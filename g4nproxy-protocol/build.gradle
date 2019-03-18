@@ -1,0 +1,10 @@
+apply plugin: 'java-library'
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    // https://mvnrepository.com/artifact/io.netty/netty-all
+    implementation group: 'io.netty', name: 'netty-all', version: '4.1.34.Final'
+}
+
+sourceCompatibility = "1.7"
+targetCompatibility = "1.7"
