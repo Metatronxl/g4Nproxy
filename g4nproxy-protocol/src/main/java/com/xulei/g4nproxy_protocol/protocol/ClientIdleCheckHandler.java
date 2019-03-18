@@ -1,6 +1,6 @@
 package com.xulei.g4nproxy_protocol.protocol;
 
-import com.virjar.nat.ALOG;
+import com.xulei.g4nproxy_protocol.ALOG;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.timeout.IdleStateEvent;

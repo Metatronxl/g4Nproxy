@@ -1,12 +1,29 @@
-apply plugin: 'java-library'
+plugins {
+    id 'org.springframework.boot' version '2.0.0.RELEASE'
+    id 'java'
+}
+
+apply plugin: 'io.spring.dependency-management'
+
+sourceSets.main.resources.srcDir 'src/main/resources'
+
+group = 'com.virjar'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = '1.7'
+
+repositories {
+    mavenCentral()
+}
 
 dependencies {
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
-    // https://mvnrepository.com/artifact/io.netty/netty-all
+    implementation 'org.springframework.boot:spring-boot-starter'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-data-rest'
+    implementation project(':g4nproxy-protocol')
+    compileOnly 'org.projectlombok:lombok'
+    implementation 'com.google.guava:guava:23.0'
     implementation group: 'io.netty', name: 'netty-all', version: '4.1.34.Final'
     // 引入g4nproxy-protocol的包
     implementation project(':g4nproxy-protocol')
+    implementation 'org.apache.commons:commons-lang3:3.7'
 }
-
-sourceCompatibility = "1.7"
-targetCompatibility = "1.7"

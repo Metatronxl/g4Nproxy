@@ -14,12 +14,7 @@ import android.provider.Settings;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
-import com.virjar.nat.ALOG;
-import com.virjar.nat.client.ProxyClient;
-import com.virjar.nat.protocol.Constants;
-
-import org.littleshoot.proxy.Launcher;
-
+import com.xulei.g4nproxy_protocol.protocol.Constants;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static android.app.PendingIntent.FLAG_UPDATE_CURRENT;
@@ -124,14 +119,15 @@ public class HttpProxyService extends Service {
             }
         });
 
-        Log.i("weijia", "start G4Proxy front service");
-        Launcher.startHttpProxyService(3128);  // 启动代理服务器
+//        Log.i("weijia", "start G4Proxy front service");
+//        Launcher.startHttpProxyService(3128);  // 启动代理服务器
 
         Log.i("weijia", "start private network forward task");
         String clientID = Settings.System.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
-        ProxyClient.start(Constants.g4ProxyServerHost_1, Constants.g4ProxyServerPort, clientID);
+//        ProxyClient.start(Constants.g4ProxyServerHost_1, Constants.g4ProxyServerPort, clientID);
+        ProxyClient.start(Constants.g4nproxyServerHost,Constants.g4nproxyServerPort,clientID);
 
-        ProxyClient.start(Constants.g4ProxyServerHost_2, Constants.g4ProxyServerPort, clientID);
+//        ProxyClient.start(Constants.g4ProxyServerHost_2, Constants.g4ProxyServerPort, clientID);
     }
 
 }

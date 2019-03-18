@@ -11,9 +11,14 @@ public interface Constants {
 
     AttributeKey<String> CLIENT_KEY = AttributeKey.newInstance("client_key");
 
-    String g4ProxyServerHost_1 = "114.116.98.169";
-    String g4ProxyServerHost_2 = "39.106.55.139";
-    int g4ProxyServerPort = 30000;
+//    String g4ProxyServerHost_1 = "114.116.98.169";
+//    String g4ProxyServerHost_2 = "39.106.55.139";
+
+    // 请求服务器IP地址
+    String g4nproxyServerHost = "127.0.0.1";
+    // 请求服务器port端口
+    int g4nproxyServerPort = 30000;
+
 
 
     int READ_IDLE_TIME = 60;
