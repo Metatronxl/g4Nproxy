@@ -3,6 +3,13 @@ package com.xulei.g4nproxy_client;
 
 
 import com.xulei.g4nproxy_client.handler.AppClientChannelHandler;
+import com.xulei.g4nproxy_client.util.LogUtil;
+import com.xulei.g4nproxy_protocol.ALOG;
+import com.xulei.g4nproxy_protocol.ClientChannelManager;
+import com.xulei.g4nproxy_protocol.ClientIdleCheckHandler;
+import com.xulei.g4nproxy_protocol.protocol.ProxyMessage;
+import com.xulei.g4nproxy_protocol.protocol.ProxyMessageDecoder;
+import com.xulei.g4nproxy_protocol.protocol.ProxyMessageEncoder;
 
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.ChannelFuture;
@@ -21,6 +28,8 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class ProxyClient {
+
+
 
     private static final String tag = "proxyCient_tag";
 
@@ -41,6 +50,8 @@ public class ProxyClient {
     private int serverPort;
     private String clientID;
 
+    private ClientChannelManager clientChannelManager;
+
     //手机的代理客户端
     private Bootstrap appBootstrap;
 
@@ -53,6 +64,9 @@ public class ProxyClient {
         this.serverPort = serverPort;
         this.clientID = clientId;
 
+        clientChannelManager = new ClientChannelManager(serverHost);
+
+
     }
 
     /**
@@ -63,10 +77,10 @@ public class ProxyClient {
      * @param clientID   客户端标记，同一个客户端标记在服务器端会映射为同一个端口
      */
     public static ProxyClient start(String serverHost, int serverPort, final String clientID) {
-        log.info(tag+"： 客户端准备启动");
+        LogUtil.i(tag,"客户端准备启动");
         ProxyClient proxyClient = new ProxyClient(serverHost, serverPort, clientID);
         proxyClient.startInernal();
-        log.info(tag+"： 客户端启动成功");
+        LogUtil.i(tag,"客户端启动成功");
         return proxyClient;
     }
 
@@ -79,6 +93,9 @@ public class ProxyClient {
                 .handler(new ChannelInitializer<SocketChannel>() {
                     @Override
                     protected void initChannel(SocketChannel ch) throws Exception {
+                        ch.pipeline().addLast(new ProxyMessageDecoder(MAX_FRAME_LENGTH, LENGTH_FIELD_OFFSET, LENGTH_FIELD_LENGTH, LENGTH_ADJUSTMENT, INITIAL_BYTES_TO_STRIP));
+                        ch.pipeline().addLast(new ProxyMessageEncoder());
+                        ch.pipeline().addLast(new ClientIdleCheckHandler());
                         ch.pipeline().addLast(new AppClientChannelHandler());
                     }
                 });
@@ -93,9 +110,18 @@ public class ProxyClient {
             @Override
             public void operationComplete(ChannelFuture future) throws Exception {
                 if (future.isSuccess()){
-                    log.info(tag+ "： connect to server successs");
+                    //连接成功后，手机代理服务器向server发送认证消息
+                    clientChannelManager.setCmdChannel(future.channel());
+                    ProxyMessage proxyMessage = new ProxyMessage();
+                    proxyMessage.setType(ProxyMessage.C_TYPE_AUTH);
+                    proxyMessage.setUri(clientID);
+                    future.channel().writeAndFlush(proxyMessage);
+                    //控制重连接时长
+                    sleepTimeMill = 1000;
+                    LogUtil.i(tag,"： connect to server successs");
+
                 }else {
-                    log.info(tag+ "： connnct to sercer failed");
+                    LogUtil.e(tag,"： connect to server failed");
                     //等待后重新尝试连接
                     reconnectWait();
                     connectServer();

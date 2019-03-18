@@ -1,6 +1,8 @@
-package com.xulei.g4nproxy_protocol.protocol;
+package com.xulei.g4nproxy_protocol;
 
 import com.xulei.g4nproxy_protocol.ALOG;
+import com.xulei.g4nproxy_protocol.protocol.Constants;
+import com.xulei.g4nproxy_protocol.protocol.ProxyMessage;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.timeout.IdleStateEvent;

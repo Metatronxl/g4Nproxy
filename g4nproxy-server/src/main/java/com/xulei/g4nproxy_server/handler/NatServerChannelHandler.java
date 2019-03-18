@@ -1,5 +1,8 @@
 package com.xulei.g4nproxy_server.handler;
 
+import com.xulei.g4nproxy_protocol.protocol.ProxyMessage;
+import com.xulei.g4nproxy_server.util.LogUtil;
+
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
@@ -14,9 +17,9 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @ChannelHandler.Sharable
-public class NatServerChannelHandler extends SimpleChannelInboundHandler<ByteBuf> {
+public class NatServerChannelHandler extends SimpleChannelInboundHandler<ProxyMessage> {
     @Override
-    protected void channelRead0(ChannelHandlerContext ctx, ByteBuf msg) throws Exception {
+    protected void channelRead0(ChannelHandlerContext ctx, ProxyMessage msg) throws Exception {
         log.info("recieved proxy message, type is:{}"+ msg.toString());
     }
 
