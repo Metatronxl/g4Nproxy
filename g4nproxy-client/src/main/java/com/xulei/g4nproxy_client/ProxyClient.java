@@ -63,9 +63,10 @@ public class ProxyClient {
      * @param clientID   客户端标记，同一个客户端标记在服务器端会映射为同一个端口
      */
     public static ProxyClient start(String serverHost, int serverPort, final String clientID) {
+        log.info(tag+"： 客户端准备启动");
         ProxyClient proxyClient = new ProxyClient(serverHost, serverPort, clientID);
         proxyClient.startInernal();
-        log.info(tag,"客户端启动成功");
+        log.info(tag+"： 客户端启动成功");
         return proxyClient;
     }
 
@@ -92,9 +93,9 @@ public class ProxyClient {
             @Override
             public void operationComplete(ChannelFuture future) throws Exception {
                 if (future.isSuccess()){
-                    log.info(tag,"connect to server successs");
+                    log.info(tag+ "： connect to server successs");
                 }else {
-                    log.info(tag,"connnct to sercer failed");
+                    log.info(tag+ "： connnct to sercer failed");
                     //等待后重新尝试连接
                     reconnectWait();
                     connectServer();

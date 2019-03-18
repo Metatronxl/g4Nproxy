@@ -17,7 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 public class NatServerChannelHandler extends SimpleChannelInboundHandler<ByteBuf> {
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, ByteBuf msg) throws Exception {
-        log.info("recieved proxy message, type is:{}", msg.toString());
+        log.info("recieved proxy message, type is:{}"+ msg.toString());
     }
 
 }
