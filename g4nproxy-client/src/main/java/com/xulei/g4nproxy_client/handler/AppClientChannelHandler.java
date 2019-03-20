@@ -57,6 +57,22 @@ public class AppClientChannelHandler extends SimpleChannelInboundHandler<ProxyMe
         LogUtil.i(tag,message.toString());
     }
 
+
+    private static String genPayLoad(){
+        StringBuilder stringBuilder = new StringBuilder();
+        for( int i=0;i<10;i++){
+            StringBuilder stringBuilder1 = new StringBuilder();
+            for(int j=0;j<100;j++){
+                stringBuilder1.append(i);
+            }
+            stringBuilder.append(stringBuilder1);
+        }
+        return stringBuilder.toString();
+    }
+
+    private static String  payload = genPayLoad()+ genPayLoad() + genPayLoad();
+    private static byte[] bytePayload = payload.getBytes();
+
     /**
      * TODO 真正的代理实现
      * 处理传输数据的请求
@@ -65,10 +81,11 @@ public class AppClientChannelHandler extends SimpleChannelInboundHandler<ProxyMe
      */
     private void handleTransferMessage(ChannelHandlerContext ctx,ProxyMessage msg){
         // 测试返回是否成功
-        byte[] bytes = "代理数据返回".getBytes();
+        LogUtil.w(tag,"代理服务器处理传输数据的请求");
+
         ProxyMessage proxyMessage = new ProxyMessage();
         proxyMessage.setType(ProxyMessage.P_TYPE_TANSFER_RTN);
-        proxyMessage.setData(bytes);
+        proxyMessage.setData(bytePayload);
 
         ctx.channel().writeAndFlush(proxyMessage);
 

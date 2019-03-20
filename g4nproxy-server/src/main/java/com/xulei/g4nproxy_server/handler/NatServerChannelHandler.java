@@ -73,7 +73,7 @@ public class NatServerChannelHandler extends SimpleChannelInboundHandler<ProxyMe
     private void handleMessageRtn(ChannelHandlerContext ctx,ProxyMessage proxyMessage){
         //获取到对应的userChannel
         Channel userMappingChannel  = ctx.channel().attr(Constants.NEXT_CHANNEL).get();
-        LogUtil.i(tag,proxyMessage.toString());
+        LogUtil.w(tag,"处理4g代理服务器返回的数据"+proxyMessage.toString());
         userMappingChannel.writeAndFlush(proxyMessage);
     }
 
