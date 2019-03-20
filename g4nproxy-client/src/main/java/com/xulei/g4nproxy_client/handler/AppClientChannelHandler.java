@@ -4,8 +4,11 @@ package com.xulei.g4nproxy_client.handler;
 import com.xulei.g4nproxy_client.Constant;
 import com.xulei.g4nproxy_client.util.LogUtil;
 import com.xulei.g4nproxy_protocol.ALOG;
+import com.xulei.g4nproxy_protocol.ClientChannelManager;
 import com.xulei.g4nproxy_protocol.protocol.Constants;
 import com.xulei.g4nproxy_protocol.protocol.ProxyMessage;
+
+import java.net.InetSocketAddress;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -85,9 +88,14 @@ public class AppClientChannelHandler extends SimpleChannelInboundHandler<ProxyMe
 
         ProxyMessage proxyMessage = new ProxyMessage();
         proxyMessage.setType(ProxyMessage.P_TYPE_TANSFER_RTN);
-        proxyMessage.setData(bytePayload);
+        proxyMessage.setData("test".getBytes());
 
         ctx.channel().writeAndFlush(proxyMessage);
+
+
+        //这里获取不到userMappingChannel
+//        Channel userMappingChannel = ctx.channel().attr(Constants.NEXT_CHANNEL).get();
+//        userMappingChannel.writeAndFlush(buf);
 
     }
     /**

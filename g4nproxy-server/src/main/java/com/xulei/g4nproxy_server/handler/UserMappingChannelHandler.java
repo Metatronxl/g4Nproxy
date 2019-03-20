@@ -25,7 +25,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @ChannelHandler.Sharable
-public class UserMappingChannelHandler extends SimpleChannelInboundHandler<ProxyMessage> {
+public class UserMappingChannelHandler extends SimpleChannelInboundHandler<ByteBuf> {
 
 
     private static AtomicLong userIdProducer = new AtomicLong(0);
@@ -40,7 +40,7 @@ public class UserMappingChannelHandler extends SimpleChannelInboundHandler<Proxy
      * @throws Exception
      */
     @Override
-    protected void channelRead0(ChannelHandlerContext ctx, ProxyMessage msg) throws Exception {
+    protected void channelRead0(ChannelHandlerContext ctx, ByteBuf msg) throws Exception {
 
         LogUtil.i(tag,"receive data from user end point");
 
@@ -59,20 +59,38 @@ public class UserMappingChannelHandler extends SimpleChannelInboundHandler<Proxy
             userMappingChannel.attr(Constants.NEXT_CHANNEL).set(natDataChannel);
 
 
-            switch (msg.getType()){
-                case ProxyMessage.P_TYPE_TRANSFER:
-                    handleMessgeTransfer(ctx,msg);
-                    break;
-                case  ProxyMessage.P_TYPE_TANSFER_RTN:
-                    handleMessageRtn(ctx,msg);
-                    break;
-            }
+            LogUtil.i(tag,"forward data to nat channel");
+            LogUtil.w(tag,"处理发送数据的逻辑"+msg.toString());
+
+            //发送数据
+            ProxyMessage proxyMessage = new ProxyMessage();
+            proxyMessage.setType(ProxyMessage.P_TYPE_TRANSFER);
+            String userId = ProxyChannelManager.getUserChannelUserId(userMappingChannel);
+            proxyMessage.setUri(userId);
+            byte[] bytes = new byte[msg.readableBytes()];
+            msg.readBytes(bytes);
+            proxyMessage.setData(bytes);
+            natDataChannel.writeAndFlush(proxyMessage);
+
+//            switch (msg.getType()){
+//                case ProxyMessage.P_TYPE_TRANSFER:
+//                    handleMessgeTransfer(ctx,msg);
+//                    break;
+//                case  ProxyMessage.P_TYPE_TANSFER_RTN:
+//                    handleMessageRtn(ctx,msg);
+//                    break;
+//
+//                 default:
+//                        handleDefault(ctx,msg);
+//                        break;
+//            }
 
 
 
         }
 
     }
+
 
     /**
      * 处理发送数据的逻辑
