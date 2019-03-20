@@ -33,8 +33,11 @@ public class AppClientChannelHandler extends SimpleChannelInboundHandler<ProxyMe
             case ProxyMessage.C_TYPE_AUTH:
                 handleAuthMessage(ctx,msg);
                 break;
-            case ProxyMessage.TYPE_CONNECT:
-                handleConnectMessages(ctx,msg);
+//            case ProxyMessage.TYPE_CONNECT:
+//                handleConnectMessages(ctx,msg);
+//                break;
+            case ProxyMessage.P_TYPE_TRANSFER:
+                handleTransferMessage(ctx, msg);
                 break;
         }
 
@@ -52,6 +55,23 @@ public class AppClientChannelHandler extends SimpleChannelInboundHandler<ProxyMe
     private void handleAuthMessage(ChannelHandlerContext ctx,ProxyMessage message){
 
         LogUtil.i(tag,message.toString());
+    }
+
+    /**
+     * TODO 真正的代理实现
+     * 处理传输数据的请求
+     * @param ctx
+     * @param msg
+     */
+    private void handleTransferMessage(ChannelHandlerContext ctx,ProxyMessage msg){
+        // 测试返回是否成功
+        byte[] bytes = "代理数据返回".getBytes();
+        ProxyMessage proxyMessage = new ProxyMessage();
+        proxyMessage.setType(ProxyMessage.P_TYPE_TANSFER_RTN);
+        proxyMessage.setData(bytes);
+
+        ctx.channel().writeAndFlush(proxyMessage);
+
     }
     /**
      * 处理连接请求

@@ -38,6 +38,11 @@ public class ProxyMessage {
     public static final byte P_TYPE_TRANSFER = 0x05;
 
     /**
+     * 代理数据传输返回
+     */
+    public static final byte P_TYPE_TANSFER_RTN = 0x08;
+
+    /**
      * 用户与代理服务器以及代理客户端与真实服务器连接是否可写状态同步
      */
     public static final byte C_TYPE_WRITE_CONTROL = 0x06;

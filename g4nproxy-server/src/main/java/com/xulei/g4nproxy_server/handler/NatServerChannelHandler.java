@@ -8,6 +8,7 @@ import com.xulei.g4nproxy_server.util.LogUtil;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
+import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
@@ -44,15 +45,52 @@ public class NatServerChannelHandler extends SimpleChannelInboundHandler<ProxyMe
     protected void channelRead0(ChannelHandlerContext ctx, ProxyMessage msg) throws Exception {
         log.info("recieved proxy message, type is:{}"+ msg.toString());
         switch (msg.getType()){
+            case ProxyMessage.TYPE_HEARTBEAT:
+                handleHeartbeatMessage(ctx, msg);
+                break;
             case ProxyMessage.C_TYPE_AUTH:
                 handleAuthMessage(ctx,msg);
                 break;
-            case ProxyMessage.TYPE_CONNECT:
-                handleConnectMessage(ctx,msg);
+            case ProxyMessage.P_TYPE_TANSFER_RTN:
+                handleMessageRtn(ctx,msg);
+                break;
+//            case ProxyMessage.TYPE_CONNECT:
+//                handleConnectMessage(ctx,msg);
+//                break;
+            case ProxyMessage.P_TYPE_TRANSFER:
+                handleTransferMessage(ctx,msg);
+                break;
 
 
         }
     }
+
+    /**
+     * 处理4g代理服务器返回的数据
+     * @param ctx
+     * @param proxyMessage
+     */
+    private void handleMessageRtn(ChannelHandlerContext ctx,ProxyMessage proxyMessage){
+        //获取到对应的userChannel
+        Channel userMappingChannel  = ctx.channel().attr(Constants.NEXT_CHANNEL).get();
+        LogUtil.i(tag,proxyMessage.toString());
+        userMappingChannel.writeAndFlush(proxyMessage);
+    }
+
+    /**
+     * 心跳处理
+     *
+     * @param ctx
+     * @param proxyMessage
+     */
+    private void handleHeartbeatMessage(ChannelHandlerContext ctx, ProxyMessage proxyMessage) {
+        ProxyMessage heartbeatMessage = new ProxyMessage();
+        heartbeatMessage.setSerialNumber(heartbeatMessage.getSerialNumber());
+        heartbeatMessage.setType(ProxyMessage.TYPE_HEARTBEAT);
+        log.info("response heartbeat message {}", ctx.channel());
+        ctx.channel().writeAndFlush(heartbeatMessage);
+    }
+
 
     /**
      * 认证消息，检测clientKey是否正确
@@ -70,9 +108,30 @@ public class NatServerChannelHandler extends SimpleChannelInboundHandler<ProxyMe
         byte[] bytes = "建立连接成功".getBytes();
         //构建数据包
         ProxyMessage responseMsg = new ProxyMessage();
-        responseMsg.setType(ProxyMessage.P_TYPE_TRANSFER);
+        responseMsg.setType(ProxyMessage.C_TYPE_AUTH);
         responseMsg.setData(bytes);
         ctx.writeAndFlush(responseMsg);
+    }
+
+    /**
+     * 代理数据传输
+     *
+     * @param ctx
+     * @param message
+     */
+    private void handleTransferMessage(ChannelHandlerContext ctx,ProxyMessage message){
+
+        LogUtil.i(tag,"发送请求数据前往4g服务器");
+        //获取到对应的userChannel
+        Channel userMappingChannel  = ctx.channel().attr(Constants.NEXT_CHANNEL).get();
+        if (userMappingChannel != null){
+            ByteBuf buf = ctx.alloc().buffer(message.getData().length);
+            buf.writeBytes(message.getData());
+            userMappingChannel.writeAndFlush(buf);
+
+        }
+
+
     }
 
     /**

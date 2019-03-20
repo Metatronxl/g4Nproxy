@@ -91,9 +91,6 @@ public class ProxyServer {
             channelFuture.get();
             LogUtil.i(tag,"开启服务器的数据端口: "+String.valueOf(port));
 
-            //双向关联
-//            natDataChannel.attr(Constants.NEXT_CHANNEL).set(userMappingChannel);
-//            userMappingChannel.attr(Constants.NEXT_CHANNEL).set(natDataChannel);
 
         } catch (Exception e) {
             log.error("wait for port binding error", e);

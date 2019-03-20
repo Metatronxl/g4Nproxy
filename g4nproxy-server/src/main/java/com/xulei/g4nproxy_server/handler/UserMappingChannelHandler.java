@@ -32,14 +32,21 @@ public class UserMappingChannelHandler extends SimpleChannelInboundHandler<ByteB
 
     private static final String tag = "userMappingCtx";
 
+    /**
+     * 在userMapping port检测到连接后，建立dataChannel和userChannel之间的绑定
+     *
+     * @param ctx
+     * @param msg
+     * @throws Exception
+     */
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, ByteBuf msg) throws Exception {
 
         LogUtil.i(tag,"receive data from user end point");
 
         // 获取代理服务器（4g）所在的channel
-        Channel userChannel =  ctx.channel();
-        InetSocketAddress sa = (InetSocketAddress) userChannel.localAddress();
+        Channel userMappingChannel =  ctx.channel();
+        InetSocketAddress sa = (InetSocketAddress) userMappingChannel.localAddress();
         Channel natDataChannel = ProxyChannelManager.getCmdChannel(sa.getPort());
 
         //通道未建立时拒绝连接
@@ -48,13 +55,13 @@ public class UserMappingChannelHandler extends SimpleChannelInboundHandler<ByteB
             ctx.channel().close();
         }else{
             // channel互相绑定
-            natDataChannel.attr(Constants.NEXT_CHANNEL).set(userChannel);
-            userChannel.attr(Constants.NEXT_CHANNEL).set(natDataChannel);
+            natDataChannel.attr(Constants.NEXT_CHANNEL).set(userMappingChannel);
+            userMappingChannel.attr(Constants.NEXT_CHANNEL).set(natDataChannel);
 
-            ByteBuf buf = Unpooled.buffer(10);
-            byte[] bytes = "收到数据".getBytes();
-            String userId = ProxyChannelManager.getUserChannelUserId(userChannel);
-            //构建数据包
+
+            byte[] bytes = new byte[msg.readableBytes()];
+            msg.readBytes(bytes);
+            String userId = ProxyChannelManager.getUserChannelUserId(userMappingChannel);
             ProxyMessage proxyMessage = new ProxyMessage();
             proxyMessage.setType(ProxyMessage.P_TYPE_TRANSFER);
             proxyMessage.setUri(userId);
