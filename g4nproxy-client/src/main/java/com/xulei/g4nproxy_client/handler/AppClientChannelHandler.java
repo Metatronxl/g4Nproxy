@@ -1,21 +1,22 @@
 package com.xulei.g4nproxy_client.handler;
 
 
-import com.xulei.g4nproxy_client.Constant;
 import com.xulei.g4nproxy_client.util.LogUtil;
-import com.xulei.g4nproxy_protocol.ALOG;
-import com.xulei.g4nproxy_protocol.ClientChannelManager;
 import com.xulei.g4nproxy_protocol.protocol.Constants;
 import com.xulei.g4nproxy_protocol.protocol.ProxyMessage;
 
-import java.net.InetSocketAddress;
-
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
+import io.netty.handler.codec.http.HttpObjectAggregator;
+import io.netty.handler.codec.http.HttpServerCodec;
 import lombok.extern.slf4j.Slf4j;
+
+import static com.xulei.g4nproxy_protocol.protocol.Constants.NAME_HTTPSERVER_CODEC;
+import static com.xulei.g4nproxy_protocol.protocol.Constants.NAME_HTTP_AGGREGATOR_HANDLER;
 
 /**
  * @author lei.X
@@ -76,6 +77,7 @@ public class AppClientChannelHandler extends SimpleChannelInboundHandler<ProxyMe
     private static String  payload = genPayLoad()+ genPayLoad() + genPayLoad();
     private static byte[] bytePayload = payload.getBytes();
 
+
     /**
      * TODO 真正的代理实现
      * 处理传输数据的请求
@@ -86,16 +88,31 @@ public class AppClientChannelHandler extends SimpleChannelInboundHandler<ProxyMe
         // 测试返回是否成功
         LogUtil.w(tag,"代理服务器处理传输数据的请求");
 
-        ProxyMessage proxyMessage = new ProxyMessage();
-        proxyMessage.setType(ProxyMessage.P_TYPE_TANSFER_RTN);
-        proxyMessage.setData("test".getBytes());
 
-        ctx.channel().writeAndFlush(proxyMessage);
+        //HttpServerCodec只接受PooledUnsafeDIrectByteBuf编码的消息
+        ByteBuf byteBuf = Unpooled.copiedBuffer(msg.getData());
 
 
-        //这里获取不到userMappingChannel
-//        Channel userMappingChannel = ctx.channel().attr(Constants.NEXT_CHANNEL).get();
-//        userMappingChannel.writeAndFlush(buf);
+        //添加HTTP 消息的处理逻辑
+
+        ctx.pipeline()
+                .addLast(NAME_HTTPSERVER_CODEC,new HttpServerCodec())
+                /**
+                 * /**usually we receive http message infragment,if we want full http message,
+                 * we should bundle HttpObjectAggregator and we can get FullHttpRequest。
+                 * 我们通常接收到的是一个http片段，如果要想完整接受一次请求的所有数据，我们需要绑定HttpObjectAggregator，然后我们
+                 * 就可以收到一个FullHttpRequest-是一个完整的请求信息。
+                 **/
+                .addLast(NAME_HTTP_AGGREGATOR_HANDLER,new HttpObjectAggregator(1024*1024)) //定义缓冲区数据量大小
+                .addLast(new HttpMsgHandler());
+//        将消息发往下一个channel
+
+//        收到的消息没有指定的结束标记。 比如指定了lineBasedFrameDecoder，没有换行标志，是不会调用channelRead方法的，其他的类似
+//        ctx.writeAndFlush(data);
+
+        ctx.fireChannelRead(byteBuf);
+
+
 
     }
     /**

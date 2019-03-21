@@ -22,7 +22,12 @@ import io.netty.channel.ChannelInitializer;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+import io.netty.handler.codec.http.HttpObjectAggregator;
+import io.netty.handler.codec.http.HttpServerCodec;
 import lombok.extern.slf4j.Slf4j;
+
+import static com.xulei.g4nproxy_protocol.protocol.Constants.NAME_HTTPSERVER_CODEC;
+import static com.xulei.g4nproxy_protocol.protocol.Constants.NAME_HTTP_AGGREGATOR_HANDLER;
 
 /**
  * @author lei.X
@@ -142,6 +147,7 @@ public class ProxyServer {
                     protected void initChannel(SocketChannel ch) throws Exception {
 //                        ch.pipeline().addLast(new ProxyMessageDecoder(MAX_FRAME_LENGTH, LENGTH_FIELD_OFFSET, LENGTH_FIELD_LENGTH, LENGTH_ADJUSTMENT, INITIAL_BYTES_TO_STRIP));
 //                        ch.pipeline().addLast(new ProxyMessageEncoder());
+
                         ch.pipeline().addLast(new UserMappingChannelHandler());
                     }
                 });

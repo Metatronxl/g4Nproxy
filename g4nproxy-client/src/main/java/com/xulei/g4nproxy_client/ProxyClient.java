@@ -3,6 +3,7 @@ package com.xulei.g4nproxy_client;
 
 
 import com.xulei.g4nproxy_client.handler.AppClientChannelHandler;
+import com.xulei.g4nproxy_client.handler.HttpMsgHandler;
 import com.xulei.g4nproxy_client.util.LogUtil;
 import com.xulei.g4nproxy_protocol.ALOG;
 import com.xulei.g4nproxy_protocol.ClientChannelManager;
@@ -97,6 +98,8 @@ public class ProxyClient {
                         ch.pipeline().addLast(new ProxyMessageEncoder());
                         ch.pipeline().addLast(new ClientIdleCheckHandler());
                         ch.pipeline().addLast(new AppClientChannelHandler());
+                        // 添加HTTP消息处理逻辑
+//                        ch.pipeline().addLast(new HttpMsgHandler());
                     }
                 });
 

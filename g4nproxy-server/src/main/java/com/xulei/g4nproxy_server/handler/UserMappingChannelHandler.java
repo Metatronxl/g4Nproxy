@@ -3,16 +3,18 @@ package com.xulei.g4nproxy_server.handler;
 import com.xulei.g4nproxy_protocol.protocol.Constants;
 import com.xulei.g4nproxy_protocol.protocol.ProxyMessage;
 import com.xulei.g4nproxy_server.server.ProxyChannelManager;
+import com.xulei.g4nproxy_server.util.ByteArrayUtil;
 import com.xulei.g4nproxy_server.util.LogUtil;
 
 import java.net.InetSocketAddress;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.SimpleChannelInboundHandler;
 import lombok.extern.slf4j.Slf4j;
@@ -43,6 +45,8 @@ public class UserMappingChannelHandler extends SimpleChannelInboundHandler<ByteB
     protected void channelRead0(ChannelHandlerContext ctx, ByteBuf msg) throws Exception {
 
         LogUtil.i(tag,"receive data from user end point");
+
+//        LogUtil.i("TEST",ByteArrayUtil.msgToString(msg));
 
         // 获取代理服务器（4g）所在的channel
         Channel userMappingChannel =  ctx.channel();

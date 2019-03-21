@@ -27,4 +27,10 @@ public interface Constants {
 
     String tag = "weijia";
 
+    String HOST_SEPARATOR = ":";
+
+     String NAME_HTTP_AGGREGATOR_HANDLER = "httpAggregator";
+     String NAME_PROXY_SERVER_HANDLER = "proxyServerHandler";
+     String NAME_HTTPSERVER_CODEC = "httpserver_codec";
+
 }
