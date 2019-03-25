@@ -2,8 +2,6 @@ package com.xulei.g4nproxy_server.handler;
 
 import com.xulei.g4nproxy_protocol.protocol.Constants;
 import com.xulei.g4nproxy_protocol.protocol.ProxyMessage;
-import com.xulei.g4nproxy_protocol.protocol.ProxyMessageDecoder;
-import com.xulei.g4nproxy_protocol.protocol.ProxyMessageEncoder;
 import com.xulei.g4nproxy_server.server.ProxyChannelManager;
 import com.xulei.g4nproxy_server.util.LogUtil;
 
@@ -12,16 +10,11 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.SimpleChannelInboundHandler;
 import lombok.extern.slf4j.Slf4j;
-
-import static com.xulei.g4nproxy_protocol.protocol.Constants.*;
 
 
 /**

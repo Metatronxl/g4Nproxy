@@ -46,7 +46,6 @@ public class AppClientChannelHandler extends SimpleChannelInboundHandler<ProxyMe
 
         //将这个管道放到Map中，方便服务器返回数据时调用
         Constants.manageCtxMap.put(Constants.DATA_CHANNEL,ctx);
-        LogUtil.i(tag,"与请求服务器建立连接成功，添加HttpMsgHandler，去除AppClientChannelHandler");
 
 //        ctx.fireChannelRead(msg);
 
