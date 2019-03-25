@@ -22,6 +22,9 @@ public interface Constants {
 
     String APP_CLIENT_HANDLER = "appClientHandler";
 
-    // clientId 和 channel 的绑定
+    // clientId 和 ChannelHandlerContext 的绑定
     Map<String, ChannelHandlerContext> manageCtxMap = new ConcurrentHashMap<String, ChannelHandlerContext>();
+    // clientId 和 Channel 的绑定
+    Map<String, Channel> manageChannelMap = new ConcurrentHashMap<String, Channel>();
+
 }

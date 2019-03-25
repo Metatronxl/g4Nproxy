@@ -30,6 +30,15 @@ dependencies {
     implementation 'org.apache.commons:commons-lang3:3.7'
     // https://mvnrepository.com/artifact/com.alibaba/fastjson
     implementation group: 'com.alibaba', name: 'fastjson', version: '1.2.56'
+    // https://mvnrepository.com/artifact/org.littleshoot/littleproxy
+    implementation group: 'org.littleshoot', name: 'littleproxy', version: '1.1.2'
+
+    // https://mvnrepository.com/artifact/log4j/log4j
+    implementation group: 'log4j', name: 'log4j', version: '1.2.17'
+// https://mvnrepository.com/artifact/org.apache.logging.log4j/log4j-core
+    implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.11.2'
+
+
 }
 
 sourceCompatibility = '1.8'

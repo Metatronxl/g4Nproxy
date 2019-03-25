@@ -136,24 +136,6 @@ public class HttpMsgHandler extends ChannelInboundHandlerAdapter {
 
     }
 
-    /**
-     * 和 目标主机 建立连接
-     */
-    private ChannelFuture connect(boolean isHttp,InetSocketAddress address,ChannelHandlerContext ctx,Object msg){
-
-        BootStrapFactory bootStrapFactory = new BootStrapFactory();
-        Bootstrap bootstrap = bootStrapFactory.build();
-        if (isHttp){
-            return bootstrap.handler(new HttpConnectChannelInitializer(ctx))
-                    .connect(address)
-                    .addListener(new HttpChannelFutureListener(msg,ctx));
-        }
-        //如果为https请求
-        return bootstrap.handler(new HttpsConnectChannelInitializer(ctx))
-                .connect(address)
-                .addListener(new HttpsChannelFutureListener(msg,ctx));
-    }
-
 
 
     @Override

@@ -3,12 +3,22 @@ package com.xulei.g4nproxy_client.handler;
 
 import com.alibaba.fastjson.JSON;
 import com.xulei.g4nproxy_client.Constants;
+import com.xulei.g4nproxy_client.initializer.HttpConnectChannelInitializer;
+import com.xulei.g4nproxy_client.initializer.HttpsConnectChannelInitializer;
+import com.xulei.g4nproxy_client.listener.HttpChannelFutureListener;
+import com.xulei.g4nproxy_client.listener.HttpsChannelFutureListener;
+import com.xulei.g4nproxy_client.util.BootStrapFactory;
+import com.xulei.g4nproxy_client.util.Launcher;
 import com.xulei.g4nproxy_client.util.LogUtil;
 import com.xulei.g4nproxy_protocol.protocol.ProxyMessage;
 
+import java.net.InetSocketAddress;
+
+import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.FullHttpRequest;
@@ -61,24 +71,9 @@ public class AppClientChannelHandler extends SimpleChannelInboundHandler<ProxyMe
 
     private void handleAuthMessage(ChannelHandlerContext ctx,ProxyMessage message){
 
+
         LogUtil.i(tag,"请求服务器的认证请求： "+new String(message.getData()));
     }
-
-
-    private static String genPayLoad(){
-        StringBuilder stringBuilder = new StringBuilder();
-        for( int i=0;i<10;i++){
-            StringBuilder stringBuilder1 = new StringBuilder();
-            for(int j=0;j<100;j++){
-                stringBuilder1.append(i);
-            }
-            stringBuilder.append(stringBuilder1);
-        }
-        return stringBuilder.toString();
-    }
-
-    private static String  payload = genPayLoad()+ genPayLoad() + genPayLoad();
-    private static byte[] bytePayload = payload.getBytes();
 
 
     /**
@@ -91,37 +86,9 @@ public class AppClientChannelHandler extends SimpleChannelInboundHandler<ProxyMe
         // 测试返回是否成功
         LogUtil.w(tag,"代理服务器处理传输数据的请求");
 
+        Launcher.startHttpProxyService(3128);
 
-        //HttpServerCodec只接受PooledUnsafeDIrectByteBuf编码的消息
-//        ByteBuf byteBuf = Unpooled.copiedBuffer(msg.getData());
-
-        //不能解析数据
-        FullHttpRequest  requestData = JSON.parseObject(msg.getData(),FullHttpRequest.class);
-
-
-        //添加HTTP 消息的处理逻辑
-
-        ctx.pipeline()
-//                .addLast(NAME_HTTPSERVER_CODEC,new HttpServerCodec())
-//                /**
-//                 * /**usually we receive http message infragment,if we want full http message,
-//                 * we should bundle HttpObjectAggregator and we can get FullHttpRequest。
-//                 * 我们通常接收到的是一个http片段，如果要想完整接受一次请求的所有数据，我们需要绑定HttpObjectAggregator，然后我们
-//                 * 就可以收到一个FullHttpRequest-是一个完整的请求信息。
-//                 **/
-//                .addLast(NAME_HTTP_AGGREGATOR_HANDLER,new HttpObjectAggregator(1024*1024)) //定义缓冲区数据量大小
-                .addLast(new HttpMsgHandler());
-//        将消息发往下一个channel
-
-//        收到的消息没有指定的结束标记。 比如指定了lineBasedFrameDecoder，没有换行标志，是不会调用channelRead方法的，其他的类似
-//        ctx.writeAndFlush(data);
-
-        //将这个管道放到Map中，方便服务器返回数据时调用
-        Constants.manageCtxMap.put(Constants.DATA_CHANNEL,ctx);
-
-        ctx.fireChannelRead(requestData);
-
-
+        LogUtil.i(tag,"LittleProxy 服务器开始完毕");
 
     }
     /**
@@ -155,6 +122,31 @@ public class AppClientChannelHandler extends SimpleChannelInboundHandler<ProxyMe
         // 当出现异常就关闭连接
         ctx.close();
     }
+
+
+    /**
+     * 和 目标主机 建立连接
+     */
+//    private ChannelFuture connectAppBootStrap(ChannelHandlerContext ctx, Object msg){
+//
+//        //建立一个BootStrap
+//        BootStrapFactory bootStrapFactory = new BootStrapFactory();
+//        Bootstrap bootstrap = bootStrapFactory.build();
+//
+//        return bootstrap.handler(new AppClientChannelHandler(ctx))
+//
+//
+//
+//        if (isHttp){
+//            return bootstrap.handler(new HttpConnectChannelInitializer(ctx))
+//                    .connect(address)
+//                    .addListener(new HttpChannelFutureListener(msg,ctx));
+//        }
+//        //如果为https请求
+//        return bootstrap.handler(new HttpsConnectChannelInitializer(ctx))
+//                .connect(address)
+//                .addListener(new HttpsChannelFutureListener(msg,ctx));
+//    }
 
 
     private byte[] testData(){

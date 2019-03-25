@@ -3,6 +3,7 @@ package com.xulei.g4nproxy_client;
 
 import com.xulei.g4nproxy_client.handler.AppClientChannelHandler;
 import com.xulei.g4nproxy_client.handler.HttpMsgHandler;
+import com.xulei.g4nproxy_client.util.Launcher;
 import com.xulei.g4nproxy_client.util.LogUtil;
 import com.xulei.g4nproxy_protocol.ClientChannelManager;
 import com.xulei.g4nproxy_protocol.ClientIdleCheckHandler;
@@ -20,10 +21,13 @@ import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.HttpServerCodec;
 import lombok.extern.slf4j.Slf4j;
+import sun.rmi.runtime.Log;
 
 import static com.xulei.g4nproxy_client.Constants.APP_CLIENT_HANDLER;
 import static com.xulei.g4nproxy_client.Constants.PROXY_MESSAGE_DECODE;
 import static com.xulei.g4nproxy_client.Constants.PROXY_MESSAGE_ENCODE;
+import static com.xulei.g4nproxy_client.Constants.manageChannelMap;
+import static com.xulei.g4nproxy_client.Constants.manageCtxMap;
 
 /**
  * @author lei.X
@@ -82,10 +86,12 @@ public class ProxyClient {
      * @param clientID   客户端标记，同一个客户端标记在服务器端会映射为同一个端口
      */
     public static ProxyClient start(String serverHost, int serverPort, final String clientID) {
-        LogUtil.i(tag,"客户端准备启动");
         ProxyClient proxyClient = new ProxyClient(serverHost, serverPort, clientID);
         proxyClient.startInernal();
-        LogUtil.i(tag,"客户端启动成功");
+        //TODO 确保3128已经建立连接后才能发送认证消息
+        //开启本地3128端口
+        Launcher.startHttpProxyService(3128);
+
         return proxyClient;
     }
 
@@ -107,16 +113,42 @@ public class ProxyClient {
                     }
                 });
 
-        connectServer();
+        connectSelfServer();
 
     }
 
+    /**
+     * 连接3128端口的内网服务器
+     */
+    private void connectSelfServer(){
+        appBootstrap.connect("127.0.0.1",3128).addListener(new ChannelFutureListener() {
+            @Override
+            public void operationComplete(ChannelFuture future) throws Exception {
+                if (future.isSuccess()){
+                    LogUtil.i(tag,"连接3128端口的服务器成功");
+                    connectServer();
+                    //将channel给保存起来
+                    manageChannelMap.put("localServerCtx",future.channel());
+                }else{
+                    LogUtil.e(tag,"连接3128端口的服务器失败");
+                    reconnectWait();
+                    connectSelfServer();
+                }
+
+            }
+        });
+    }
+
+    /**
+     * 连接请求服务器
+     */
 
     private void connectServer(){
         appBootstrap.connect(serverHost,serverPort).addListener(new ChannelFutureListener() {
             @Override
             public void operationComplete(ChannelFuture future) throws Exception {
                 if (future.isSuccess()){
+
                     //连接成功后，手机代理服务器向server发送认证消息
                     clientChannelManager.setCmdChannel(future.channel());
                     ProxyMessage proxyMessage = new ProxyMessage();
