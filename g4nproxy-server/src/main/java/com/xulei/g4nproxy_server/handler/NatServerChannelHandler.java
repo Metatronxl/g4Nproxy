@@ -5,12 +5,14 @@ import com.xulei.g4nproxy_protocol.protocol.ProxyMessage;
 import com.xulei.g4nproxy_server.server.ProxyChannelManager;
 import com.xulei.g4nproxy_server.server.ProxyServer;
 import com.xulei.g4nproxy_server.util.ByteArrayUtil;
+import com.xulei.g4nproxy_server.util.CtxUtil;
 import com.xulei.g4nproxy_server.util.LogUtil;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelId;
@@ -105,7 +107,7 @@ public class NatServerChannelHandler extends SimpleChannelInboundHandler<ProxyMe
      * @param ctx
      * @param proxyMessage
      */
-    private void handleAuthMessage(ChannelHandlerContext ctx, ProxyMessage proxyMessage) {
+    private void handleAuthMessage(final ChannelHandlerContext ctx, ProxyMessage proxyMessage) {
         String clientKey = proxyMessage.getUri();
         log.info("client connect :{}", clientKey);
         // 将对应的手机和管道 组合起来
@@ -117,7 +119,21 @@ public class NatServerChannelHandler extends SimpleChannelInboundHandler<ProxyMe
         ProxyMessage responseMsg = new ProxyMessage();
         responseMsg.setType(ProxyMessage.C_TYPE_AUTH);
         responseMsg.setData(bytes);
+
+        //去掉ProxyMessage编解码器
+//        ctx.pipeline().remove(Constants.PROXY_MESSAGE_DECODE);
+//        ctx.pipeline().remove(Constants.PROXY_MESSAGE_ENCODE);
+
+        //发送认证消息给4g代理服务器
         ctx.writeAndFlush(responseMsg);
+//                .addListener(new ChannelFutureListener() {
+//            @Override
+//            public void operationComplete(ChannelFuture future) throws Exception {
+//                //发送完数据后再添加上
+//                CtxUtil.AddProxyMessageHandler(future.channel());
+//            }
+//        });
+
     }
 
     /**

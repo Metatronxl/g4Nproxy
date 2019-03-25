@@ -16,6 +16,12 @@ public interface Constants {
 
     String DATA_CHANNEL = "dataTransformChannel";
 
+
+    String PROXY_MESSAGE_ENCODE = "ProxyMessageEncode";
+    String PROXY_MESSAGE_DECODE  = "proxyMessageDecoed";
+
+    String APP_CLIENT_HANDLER = "appClientHandler";
+
     // clientId 和 channel 的绑定
     Map<String, ChannelHandlerContext> manageCtxMap = new ConcurrentHashMap<String, ChannelHandlerContext>();
 }

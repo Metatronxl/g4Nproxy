@@ -2,6 +2,8 @@ package com.xulei.g4nproxy_server.handler;
 
 import com.xulei.g4nproxy_protocol.protocol.Constants;
 import com.xulei.g4nproxy_protocol.protocol.ProxyMessage;
+import com.xulei.g4nproxy_protocol.protocol.ProxyMessageDecoder;
+import com.xulei.g4nproxy_protocol.protocol.ProxyMessageEncoder;
 import com.xulei.g4nproxy_server.server.ProxyChannelManager;
 import com.xulei.g4nproxy_server.util.LogUtil;
 
@@ -10,11 +12,17 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.SimpleChannelInboundHandler;
 import lombok.extern.slf4j.Slf4j;
+
+import static com.xulei.g4nproxy_protocol.protocol.Constants.*;
+
 
 /**
  * 手机与服务器之间的channelHandler
@@ -60,35 +68,17 @@ public class UserMappingChannelHandler extends SimpleChannelInboundHandler<ByteB
             userMappingChannel.attr(Constants.NEXT_CHANNEL).set(natDataChannel);
 
 
-            String testId =  userMappingChannel.id().asShortText();
-            LogUtil.i("userMappingChannelId 1: ",testId);
-
-
-            LogUtil.i(tag,"forward data to nat channel");
-            LogUtil.w(tag,"处理发送数据的逻辑"+msg.toString());
-
-            //发送数据
-            ProxyMessage proxyMessage = new ProxyMessage();
-            proxyMessage.setType(ProxyMessage.P_TYPE_TRANSFER);
-            String userId = ProxyChannelManager.getUserChannelUserId(userMappingChannel);
-            proxyMessage.setUri(userId);
             byte[] bytes = new byte[msg.readableBytes()];
             msg.readBytes(bytes);
+            String userId = ProxyChannelManager.getUserChannelUserId(userMappingChannel);
+            ProxyMessage proxyMessage = new ProxyMessage();
+            proxyMessage.setType(ProxyMessage.P_TYPE_TRANSFER);
+            proxyMessage.setUri(userId);
             proxyMessage.setData(bytes);
             natDataChannel.writeAndFlush(proxyMessage);
+            LogUtil.i(tag,"将http请求以proxyMessage的类型发送到4g代理服务器");
 
-//            switch (msg.getType()){
-//                case ProxyMessage.P_TYPE_TRANSFER:
-//                    handleMessgeTransfer(ctx,msg);
-//                    break;
-//                case  ProxyMessage.P_TYPE_TANSFER_RTN:
-//                    handleMessageRtn(ctx,msg);
-//                    break;
-//
-//                 default:
-//                        handleDefault(ctx,msg);
-//                        break;
-//            }
+
 
 
 

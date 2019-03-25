@@ -1,6 +1,7 @@
 package com.xulei.g4nproxy_client.handler;
 
 
+import com.alibaba.fastjson.JSON;
 import com.xulei.g4nproxy_client.Constants;
 import com.xulei.g4nproxy_client.util.LogUtil;
 import com.xulei.g4nproxy_protocol.protocol.ProxyMessage;
@@ -10,12 +11,8 @@ import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
-import io.netty.handler.codec.http.HttpObjectAggregator;
-import io.netty.handler.codec.http.HttpServerCodec;
+import io.netty.handler.codec.http.FullHttpRequest;
 import lombok.extern.slf4j.Slf4j;
-
-import static com.xulei.g4nproxy_protocol.protocol.Constants.NAME_HTTPSERVER_CODEC;
-import static com.xulei.g4nproxy_protocol.protocol.Constants.NAME_HTTP_AGGREGATOR_HANDLER;
 
 /**
  * @author lei.X
@@ -31,6 +28,7 @@ public class AppClientChannelHandler extends SimpleChannelInboundHandler<ProxyMe
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, ProxyMessage msg) throws Exception {
+
         LogUtil.i(tag,"receive message: "+msg.toString());
         switch (msg.getType()){
             case ProxyMessage.C_TYPE_AUTH:
@@ -46,6 +44,13 @@ public class AppClientChannelHandler extends SimpleChannelInboundHandler<ProxyMe
 
 
 
+        //将这个管道放到Map中，方便服务器返回数据时调用
+        Constants.manageCtxMap.put(Constants.DATA_CHANNEL,ctx);
+        LogUtil.i(tag,"与请求服务器建立连接成功，添加HttpMsgHandler，去除AppClientChannelHandler");
+
+//        ctx.fireChannelRead(msg);
+
+
     }
 
 
@@ -57,7 +62,7 @@ public class AppClientChannelHandler extends SimpleChannelInboundHandler<ProxyMe
 
     private void handleAuthMessage(ChannelHandlerContext ctx,ProxyMessage message){
 
-        LogUtil.i(tag,message.toString());
+        LogUtil.i(tag,"请求服务器的认证请求： "+new String(message.getData()));
     }
 
 
@@ -89,20 +94,23 @@ public class AppClientChannelHandler extends SimpleChannelInboundHandler<ProxyMe
 
 
         //HttpServerCodec只接受PooledUnsafeDIrectByteBuf编码的消息
-        ByteBuf byteBuf = Unpooled.copiedBuffer(msg.getData());
+//        ByteBuf byteBuf = Unpooled.copiedBuffer(msg.getData());
+
+        //不能解析数据
+        FullHttpRequest  requestData = JSON.parseObject(msg.getData(),FullHttpRequest.class);
 
 
         //添加HTTP 消息的处理逻辑
 
         ctx.pipeline()
-                .addLast(NAME_HTTPSERVER_CODEC,new HttpServerCodec())
-                /**
-                 * /**usually we receive http message infragment,if we want full http message,
-                 * we should bundle HttpObjectAggregator and we can get FullHttpRequest。
-                 * 我们通常接收到的是一个http片段，如果要想完整接受一次请求的所有数据，我们需要绑定HttpObjectAggregator，然后我们
-                 * 就可以收到一个FullHttpRequest-是一个完整的请求信息。
-                 **/
-                .addLast(NAME_HTTP_AGGREGATOR_HANDLER,new HttpObjectAggregator(1024*1024)) //定义缓冲区数据量大小
+//                .addLast(NAME_HTTPSERVER_CODEC,new HttpServerCodec())
+//                /**
+//                 * /**usually we receive http message infragment,if we want full http message,
+//                 * we should bundle HttpObjectAggregator and we can get FullHttpRequest。
+//                 * 我们通常接收到的是一个http片段，如果要想完整接受一次请求的所有数据，我们需要绑定HttpObjectAggregator，然后我们
+//                 * 就可以收到一个FullHttpRequest-是一个完整的请求信息。
+//                 **/
+//                .addLast(NAME_HTTP_AGGREGATOR_HANDLER,new HttpObjectAggregator(1024*1024)) //定义缓冲区数据量大小
                 .addLast(new HttpMsgHandler());
 //        将消息发往下一个channel
 
@@ -112,7 +120,7 @@ public class AppClientChannelHandler extends SimpleChannelInboundHandler<ProxyMe
         //将这个管道放到Map中，方便服务器返回数据时调用
         Constants.manageCtxMap.put(Constants.DATA_CHANNEL,ctx);
 
-        ctx.fireChannelRead(byteBuf);
+        ctx.fireChannelRead(requestData);
 
 
 

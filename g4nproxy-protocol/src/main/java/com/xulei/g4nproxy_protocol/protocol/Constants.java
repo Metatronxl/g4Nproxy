@@ -29,8 +29,25 @@ public interface Constants {
 
     String HOST_SEPARATOR = ":";
 
-     String NAME_HTTP_AGGREGATOR_HANDLER = "httpAggregator";
-     String NAME_PROXY_SERVER_HANDLER = "proxyServerHandler";
-     String NAME_HTTPSERVER_CODEC = "httpserver_codec";
+    String NAME_HTTP_AGGREGATOR_HANDLER = "httpAggregator";
+    String NAME_PROXY_SERVER_HANDLER = "proxyServerHandler";
+    String NAME_HTTPSERVER_CODEC = "httpserver_codec";
+
+
+    String PROXY_MESSAGE_ENCODE = "ProxyMessageEncode";
+    String PROXY_MESSAGE_DECODE  = "proxyMessageDecoed";
+
+
+// ProxyMessage 参数相关
+
+     int MAX_FRAME_LENGTH = 2 * 1024 * 1024;
+
+     int LENGTH_FIELD_OFFSET = 0;
+
+     int LENGTH_FIELD_LENGTH = 4;
+
+     int INITIAL_BYTES_TO_STRIP = 0;
+
+     int LENGTH_ADJUSTMENT = 0;
 
 }

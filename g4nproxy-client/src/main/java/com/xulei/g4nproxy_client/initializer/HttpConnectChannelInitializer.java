@@ -36,7 +36,7 @@ public class HttpConnectChannelInitializer extends ChannelInitializer<SocketChan
     @Override
     protected void initChannel(SocketChannel ch) throws Exception {
         ch.pipeline()
-                .addLast(new HttpServerCodec())
+                .addLast(new HttpClientCodec())
                 .addLast(new HttpObjectAggregator(Integer.MAX_VALUE))
                 .addLast(new HttpConnectHandler(ctx));
 

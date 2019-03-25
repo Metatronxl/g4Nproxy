@@ -1,11 +1,9 @@
 package com.xulei.g4nproxy_client;
 
 
-
 import com.xulei.g4nproxy_client.handler.AppClientChannelHandler;
 import com.xulei.g4nproxy_client.handler.HttpMsgHandler;
 import com.xulei.g4nproxy_client.util.LogUtil;
-import com.xulei.g4nproxy_protocol.ALOG;
 import com.xulei.g4nproxy_protocol.ClientChannelManager;
 import com.xulei.g4nproxy_protocol.ClientIdleCheckHandler;
 import com.xulei.g4nproxy_protocol.protocol.ProxyMessage;
@@ -19,7 +17,13 @@ import io.netty.channel.ChannelInitializer;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import io.netty.handler.codec.http.HttpObjectAggregator;
+import io.netty.handler.codec.http.HttpServerCodec;
 import lombok.extern.slf4j.Slf4j;
+
+import static com.xulei.g4nproxy_client.Constants.APP_CLIENT_HANDLER;
+import static com.xulei.g4nproxy_client.Constants.PROXY_MESSAGE_DECODE;
+import static com.xulei.g4nproxy_client.Constants.PROXY_MESSAGE_ENCODE;
 
 /**
  * @author lei.X
@@ -94,10 +98,10 @@ public class ProxyClient {
                 .handler(new ChannelInitializer<SocketChannel>() {
                     @Override
                     protected void initChannel(SocketChannel ch) throws Exception {
-                        ch.pipeline().addLast(new ProxyMessageDecoder(MAX_FRAME_LENGTH, LENGTH_FIELD_OFFSET, LENGTH_FIELD_LENGTH, LENGTH_ADJUSTMENT, INITIAL_BYTES_TO_STRIP));
-                        ch.pipeline().addLast(new ProxyMessageEncoder());
+                        ch.pipeline().addLast(PROXY_MESSAGE_ENCODE,new ProxyMessageEncoder());
+                        ch.pipeline().addLast(PROXY_MESSAGE_DECODE,new ProxyMessageDecoder(MAX_FRAME_LENGTH, LENGTH_FIELD_OFFSET, LENGTH_FIELD_LENGTH, LENGTH_ADJUSTMENT, INITIAL_BYTES_TO_STRIP));
                         ch.pipeline().addLast(new ClientIdleCheckHandler());
-                        ch.pipeline().addLast(new AppClientChannelHandler());
+                        ch.pipeline().addLast(APP_CLIENT_HANDLER,new AppClientChannelHandler());
                         // 添加HTTP消息处理逻辑
 //                        ch.pipeline().addLast(new HttpMsgHandler());
                     }
@@ -119,6 +123,7 @@ public class ProxyClient {
                     proxyMessage.setType(ProxyMessage.C_TYPE_AUTH);
                     proxyMessage.setUri(clientID);
                     future.channel().writeAndFlush(proxyMessage);
+
                     //控制重连接时长
                     sleepTimeMill = 1000;
                     LogUtil.i(tag,"： connect to server successs");

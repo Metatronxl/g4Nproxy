@@ -28,6 +28,8 @@ dependencies {
     implementation group: 'com.github.ben-manes.caffeine', name: 'guava', version: '2.7.0'
 
     implementation 'org.apache.commons:commons-lang3:3.7'
+    // https://mvnrepository.com/artifact/com.alibaba/fastjson
+    implementation group: 'com.alibaba', name: 'fastjson', version: '1.2.56'
 }
 
 sourceCompatibility = '1.8'

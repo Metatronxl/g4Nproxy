@@ -54,14 +54,18 @@ public class HttpConnectHandler extends ChannelInboundHandlerAdapter {
      * 	(ps: 我关闭后,看直播时,无法加载出视频.... 不将它关闭,就一切正常.  并且,我之前测试过,客户端多次连接会使用相同id的channel.
      * 	也就是同一个TCP连接.)
      *
+     *
+     * 	ctx0为与请求服务器（ex:baidu.com）传输数据的ctx
+     * 	ctx 为传入的ctx，用于将数据写回到原来的服务器
+     *
      */
     @Override
     public void channelRead(ChannelHandlerContext ctx0, Object msg) throws Exception {
 
         //目标主机的响应数据
-//			FullHttpResponse response = (FullHttpResponse) msg;
+//		  FullHttpResponse response = (FullHttpResponse) msg;
 //        PooledUnsafeDirectByteBuf(ridx: 0, widx: 725, cap: 1024)
-//			LogUtil.i("TTTT", msg.toString());
+//		  LogUtil.i("TTTT", msg.toString());
 
         //添加解码器
 //        ctx.pipeline().addLast(new HttpServerCodec());
@@ -75,12 +79,13 @@ public class HttpConnectHandler extends ChannelInboundHandlerAdapter {
 //        ctx0.fireChannelRead(msg);
 
 
+        //发回给客户端(返回的数据还未经过HttpServerCodec解码)
+        ProxyUtil.writeAndFlush(ctx, msg, true);
 
-
-        LogUtil.i("test msg kind",msg.toString());
-
-        DefaultHttpResponse test = (DefaultHttpResponse)msg;
-        test.getDecoderResult();
+//        LogUtil.i("test msg kind",msg.toString());
+//
+//        DefaultHttpResponse test = (DefaultHttpResponse)msg;
+//        test.getDecoderResult();
 
 
 

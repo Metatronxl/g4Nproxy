@@ -45,6 +45,7 @@ public class HttpMsgHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelRead(ChannelHandlerContext ctx,  Object msg) throws Exception {
+
         String channelId = ProxyUtil.getChannelId(ctx);
 //        log.info(tag+"测试获得的数据："+ProxyUtil.msgToString(msg));
 
