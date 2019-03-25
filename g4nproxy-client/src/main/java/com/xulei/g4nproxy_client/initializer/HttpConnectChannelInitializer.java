@@ -7,6 +7,7 @@ import io.netty.channel.ChannelInitializer;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.codec.http.HttpClientCodec;
 import io.netty.handler.codec.http.HttpObjectAggregator;
+import io.netty.handler.codec.http.HttpServerCodec;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -35,9 +36,10 @@ public class HttpConnectChannelInitializer extends ChannelInitializer<SocketChan
     @Override
     protected void initChannel(SocketChannel ch) throws Exception {
         ch.pipeline()
-                .addLast(new HttpClientCodec())
+                .addLast(new HttpServerCodec())
                 .addLast(new HttpObjectAggregator(Integer.MAX_VALUE))
                 .addLast(new HttpConnectHandler(ctx));
+
     }
 
 //    public void init(ProxyConfig proxyConfig){

@@ -77,7 +77,7 @@ public class HttpMsgHandler extends ChannelInboundHandlerAdapter {
                     return;
                 }
                 //Http
-                log.info((Marker) log,",http request, target url:{}",channelId,request.uri());
+                LogUtil.i(tag,"http request, target url : "+request.uri());
                 HttpHeaders headers = request.headers();
                 headers.add("Connection",headers.get("Proxy-Connection"));
                 headers.remove("Proxy-Connection");

@@ -1,12 +1,11 @@
 package com.xulei.g4nproxy_client.handler;
 
 
+import com.xulei.g4nproxy_client.Constants;
 import com.xulei.g4nproxy_client.util.LogUtil;
-import com.xulei.g4nproxy_protocol.protocol.Constants;
 import com.xulei.g4nproxy_protocol.protocol.ProxyMessage;
 
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
@@ -110,6 +109,9 @@ public class AppClientChannelHandler extends SimpleChannelInboundHandler<ProxyMe
 //        收到的消息没有指定的结束标记。 比如指定了lineBasedFrameDecoder，没有换行标志，是不会调用channelRead方法的，其他的类似
 //        ctx.writeAndFlush(data);
 
+        //将这个管道放到Map中，方便服务器返回数据时调用
+        Constants.manageCtxMap.put(Constants.DATA_CHANNEL,ctx);
+
         ctx.fireChannelRead(byteBuf);
 
 
@@ -126,7 +128,7 @@ public class AppClientChannelHandler extends SimpleChannelInboundHandler<ProxyMe
         LogUtil.i(tag,"进入连接处理模块");
 
         //获取数据传输的channel
-        Channel dataChannel = ctx.channel().attr(Constants.NEXT_CHANNEL).get();
+        Channel dataChannel = ctx.channel().attr(com.xulei.g4nproxy_protocol.protocol.Constants.NEXT_CHANNEL).get();
         ProxyMessage testMesage = new ProxyMessage();
         testMesage.setData(testData());
         testMesage.setUri("test");

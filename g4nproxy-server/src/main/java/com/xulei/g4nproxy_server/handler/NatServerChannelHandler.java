@@ -4,6 +4,7 @@ import com.xulei.g4nproxy_protocol.protocol.Constants;
 import com.xulei.g4nproxy_protocol.protocol.ProxyMessage;
 import com.xulei.g4nproxy_server.server.ProxyChannelManager;
 import com.xulei.g4nproxy_server.server.ProxyServer;
+import com.xulei.g4nproxy_server.util.ByteArrayUtil;
 import com.xulei.g4nproxy_server.util.LogUtil;
 
 import io.netty.buffer.ByteBuf;
@@ -12,6 +13,7 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelId;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.util.concurrent.EventExecutorGroup;
 import lombok.extern.slf4j.Slf4j;
@@ -73,8 +75,13 @@ public class NatServerChannelHandler extends SimpleChannelInboundHandler<ProxyMe
     private void handleMessageRtn(ChannelHandlerContext ctx,ProxyMessage proxyMessage){
         //获取到对应的userChannel
         Channel userMappingChannel  = ctx.channel().attr(Constants.NEXT_CHANNEL).get();
-        LogUtil.w(tag,"处理4g代理服务器返回的数据"+proxyMessage.toString());
+        String userId =  userMappingChannel.id().asShortText();
+        LogUtil.i("userMappingChannelId 2: ",userId);
+
+        LogUtil.w(tag,"处理4g代理服务器返回的数据"+new String(proxyMessage.getData()));
+//        LogUtil.i("TTTTTTTTT", ByteArrayUtil.msgToString(proxyMessage.getData()));
         userMappingChannel.writeAndFlush(proxyMessage.getData());
+
     }
 
     /**

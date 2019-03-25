@@ -1,9 +1,11 @@
 package com.xulei.g4nproxy_client.handler;
 
+import com.xulei.g4nproxy_client.util.LogUtil;
 import com.xulei.g4nproxy_client.util.ProxyUtil;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
+import io.netty.handler.codec.http.DefaultHttpResponse;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -55,12 +57,60 @@ public class HttpConnectHandler extends ChannelInboundHandlerAdapter {
      */
     @Override
     public void channelRead(ChannelHandlerContext ctx0, Object msg) throws Exception {
+
         //目标主机的响应数据
 //			FullHttpResponse response = (FullHttpResponse) msg;
-        log.info(LOG_PRE + ",读取到响应.", ProxyUtil.getChannelId(ctx));
-        //发回给客户端
-        ProxyUtil.writeAndFlush(ctx, msg, true);
+//        PooledUnsafeDirectByteBuf(ridx: 0, widx: 725, cap: 1024)
+//			LogUtil.i("TTTT", msg.toString());
+
+        //添加解码器
+//        ctx.pipeline().addLast(new HttpServerCodec());
+//        ctx.pipeline().addLast(new HttpResponseHandler(ctx0));
+//        ctx.fireChannelRead(msg);
+
+//        ctx0.pipeline().addLast(new HttpResponseDecoder());
+//        ctx0.pipeline().addLast(new HttpObjectAggregator(Integer.MAX_VALUE));
+//        ctx0.pipeline().addLast(new HttpResponseHandler(ctx));
+//
+//        ctx0.fireChannelRead(msg);
+
+
+
+
+        LogUtil.i("test msg kind",msg.toString());
+
+        DefaultHttpResponse test = (DefaultHttpResponse)msg;
+        test.getDecoderResult();
+
+
+
+//        if (msg instanceof HttpResponse){
+//
+//        }
+//
+        // 发回给客户端
+
+//        ChannelHandlerContext dataChannelCtx = Constants.manageCtxMap.get(Constants.DATA_CHANNEL);
+//
+//
+//        ProxyMessage dataMsg = wrapperTransFormData(msg);
+//
+//        dataChannelCtx.pipeline().writeAndFlush(dataMsg).addListener(new ChannelFutureListener() {
+//            @Override
+//            public void operationComplete(ChannelFuture future) throws Exception {
+//                if (future.isSuccess()){
+//                    LogUtil.i(LOG_PRE,"响应数据返回");
+//                }else{
+//                    LogUtil.e(LOG_PRE,"响应数据返回失败");
+//                }
+//            }
+//        });
+
+
     }
+
+
+
 
     /**
      * 异常处理

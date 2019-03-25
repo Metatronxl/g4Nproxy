@@ -3,18 +3,15 @@ package com.xulei.g4nproxy_server.handler;
 import com.xulei.g4nproxy_protocol.protocol.Constants;
 import com.xulei.g4nproxy_protocol.protocol.ProxyMessage;
 import com.xulei.g4nproxy_server.server.ProxyChannelManager;
-import com.xulei.g4nproxy_server.util.ByteArrayUtil;
 import com.xulei.g4nproxy_server.util.LogUtil;
 
 import java.net.InetSocketAddress;
-import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.SimpleChannelInboundHandler;
 import lombok.extern.slf4j.Slf4j;
@@ -61,6 +58,10 @@ public class UserMappingChannelHandler extends SimpleChannelInboundHandler<ByteB
             // channel互相绑定
             natDataChannel.attr(Constants.NEXT_CHANNEL).set(userMappingChannel);
             userMappingChannel.attr(Constants.NEXT_CHANNEL).set(natDataChannel);
+
+
+            String testId =  userMappingChannel.id().asShortText();
+            LogUtil.i("userMappingChannelId 1: ",testId);
 
 
             LogUtil.i(tag,"forward data to nat channel");

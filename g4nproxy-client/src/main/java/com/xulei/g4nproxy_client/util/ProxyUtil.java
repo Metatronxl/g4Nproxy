@@ -1,6 +1,7 @@
 package com.xulei.g4nproxy_client.util;
 
 import com.xulei.g4nproxy_protocol.protocol.Constants;
+import com.xulei.g4nproxy_protocol.protocol.ProxyMessage;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
@@ -30,14 +31,11 @@ public class ProxyUtil {
     public static boolean writeAndFlush(final ChannelHandlerContext ctx, Object msg, Boolean isCloseOnError){
         if (ctx.channel().isActive()){
             log.info("通道id:{},正在向客户端写入数据.",getChannelId(ctx));
-            ctx.writeAndFlush(msg).addListener(new ChannelFutureListener() {
-                @Override
-                public void operationComplete(ChannelFuture future) throws Exception {
-                    if (future.isSuccess()) {
-                        log.info("通道id:{},向客户端写入数据成功", getChannelId(ctx));
-                    } else {
-                        log.info("通道id:{},向客户端写入数据失败，e:{}", getChannelId(ctx), future.cause().getMessage(), future.cause());
-                    }
+            ctx.writeAndFlush(msg).addListener((ChannelFutureListener) future -> {
+                if (future.isSuccess()) {
+                    log.info("通道id:{},向客户端写入数据成功", getChannelId(ctx));
+                } else {
+                    log.info("通道id:{},向客户端写入数据失败，e:{}", getChannelId(ctx), future.cause().getMessage(), future.cause());
                 }
             });
             return true;
@@ -45,6 +43,27 @@ public class ProxyUtil {
         else if (isCloseOnError){
             ctx.close();
         }
+        return false;
+    }
+
+    public static boolean writeAndFlush(Channel channel,Object msg,Boolean isCloseOnError){
+        if (channel.isActive()){
+            log.info("通道id:{},正在向客户端写入数据.",channel.id().asShortText());
+            channel.writeAndFlush(msg).addListener(new ChannelFutureListener() {
+                @Override
+                public void operationComplete(ChannelFuture future) throws Exception {
+                    if (future.isSuccess()) {
+                        log.info("通道id:{},向客户端写入数据成功", channel.id().asShortText());
+                    } else {
+                        log.info("通道id:{},向客户端写入数据失败，e:{}", channel.id().asShortText(), future.cause().getMessage(), future.cause());
+                    }
+                }
+            });
+            return true;
+        }else if (isCloseOnError){
+            channel.close();
+        }
+
         return false;
     }
 
@@ -85,5 +104,20 @@ public class ProxyUtil {
         byte[] byteArray = new byte[bf.readableBytes()];
         bf.readBytes(byteArray);
         return new String(byteArray);
+    }
+
+
+    public static ProxyMessage wrapperTransFormData(Object msg){
+
+
+        byte[] msgBytes = (msg.toString()).getBytes();
+
+
+        ProxyMessage proxyMessage = new ProxyMessage();
+        proxyMessage.setType(ProxyMessage.P_TYPE_TANSFER_RTN);
+        proxyMessage.setUri("TEST");
+        proxyMessage.setData(msgBytes);
+
+        return proxyMessage;
     }
 }
