@@ -113,8 +113,8 @@ public class ProxyClient {
                     }
                 });
 
-        connectSelfServer();
-
+//        connectSelfServer();
+        connectServer();
     }
 
     /**
@@ -128,7 +128,7 @@ public class ProxyClient {
                     LogUtil.i(tag,"连接3128端口的服务器成功");
                     connectServer();
                     //将channel给保存起来
-                    manageChannelMap.put("localServerCtx",future.channel());
+                    manageChannelMap.put(Constants.LOCAL_SERVER_CHANNEL,future.channel());
                 }else{
                     LogUtil.e(tag,"连接3128端口的服务器失败");
                     reconnectWait();

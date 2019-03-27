@@ -1,27 +1,15 @@
 package com.xulei.g4nproxy_client.handler;
 
 
-import com.alibaba.fastjson.JSON;
 import com.xulei.g4nproxy_client.Constants;
-import com.xulei.g4nproxy_client.initializer.HttpConnectChannelInitializer;
-import com.xulei.g4nproxy_client.initializer.HttpsConnectChannelInitializer;
-import com.xulei.g4nproxy_client.listener.HttpChannelFutureListener;
-import com.xulei.g4nproxy_client.listener.HttpsChannelFutureListener;
-import com.xulei.g4nproxy_client.util.BootStrapFactory;
-import com.xulei.g4nproxy_client.util.Launcher;
 import com.xulei.g4nproxy_client.util.LogUtil;
 import com.xulei.g4nproxy_protocol.protocol.ProxyMessage;
 
-import java.net.InetSocketAddress;
-
-import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
-import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
-import io.netty.handler.codec.http.FullHttpRequest;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -86,9 +74,11 @@ public class AppClientChannelHandler extends SimpleChannelInboundHandler<ProxyMe
         // 测试返回是否成功
         LogUtil.w(tag,"代理服务器处理传输数据的请求");
 
-        Launcher.startHttpProxyService(3128);
+        Channel littleProxyChannel = Constants.manageChannelMap.get(Constants.LOCAL_SERVER_CHANNEL);
 
-        LogUtil.i(tag,"LittleProxy 服务器开始完毕");
+        byte[] data  = msg.getData();
+
+        littleProxyChannel.writeAndFlush(data);
 
     }
     /**

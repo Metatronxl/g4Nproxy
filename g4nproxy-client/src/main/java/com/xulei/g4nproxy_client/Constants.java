@@ -22,6 +22,9 @@ public interface Constants {
 
     String APP_CLIENT_HANDLER = "appClientHandler";
 
+    // 本地与littleProxy代理的channel
+    String LOCAL_SERVER_CHANNEL = "localServerCtx";
+
     // clientId 和 ChannelHandlerContext 的绑定
     Map<String, ChannelHandlerContext> manageCtxMap = new ConcurrentHashMap<String, ChannelHandlerContext>();
     // clientId 和 Channel 的绑定

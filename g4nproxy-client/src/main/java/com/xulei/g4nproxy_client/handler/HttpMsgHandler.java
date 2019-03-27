@@ -20,6 +20,9 @@ import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
+import io.netty.channel.ChannelOption;
+import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.http.DefaultFullHttpResponse;
 import io.netty.handler.codec.http.DefaultHttpResponse;
 import io.netty.handler.codec.http.FullHttpRequest;
@@ -183,6 +186,26 @@ public class HttpMsgHandler extends ChannelInboundHandlerAdapter {
         private InetSocketAddress address;
         //当前请求与目标主机建立的连接通道
         private ChannelFuture channelFuture;
+    }
+
+    /**
+     * 和 目标主机 建立连接
+     */
+    private ChannelFuture connect(boolean isHttp,InetSocketAddress address,ChannelHandlerContext ctx,Object msg){
+        Bootstrap bootstrap = new Bootstrap()
+                .group(new NioEventLoopGroup())
+                .channel(NioSocketChannel.class)
+                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 20000);
+
+        if (isHttp){
+            return bootstrap.handler(new HttpConnectChannelInitializer(ctx))
+                    .connect(address)
+                    .addListener(new HttpChannelFutureListener(msg,ctx));
+        }
+        //如果为https请求
+        return bootstrap.handler(new HttpsConnectChannelInitializer(ctx))
+                .connect(address)
+                .addListener(new HttpsChannelFutureListener(msg,ctx));
     }
 
 
