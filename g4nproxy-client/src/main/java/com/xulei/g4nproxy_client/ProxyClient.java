@@ -2,7 +2,9 @@ package com.xulei.g4nproxy_client;
 
 
 import com.xulei.g4nproxy_client.handler.AppClientChannelHandler;
+import com.xulei.g4nproxy_client.handler.HttpConnectHandler;
 import com.xulei.g4nproxy_client.handler.HttpMsgHandler;
+import com.xulei.g4nproxy_client.initializer.AppConnectChannelInitializer;
 import com.xulei.g4nproxy_client.util.Launcher;
 import com.xulei.g4nproxy_client.util.LogUtil;
 import com.xulei.g4nproxy_protocol.ClientChannelManager;
@@ -11,13 +13,18 @@ import com.xulei.g4nproxy_protocol.protocol.ProxyMessage;
 import com.xulei.g4nproxy_protocol.protocol.ProxyMessageDecoder;
 import com.xulei.g4nproxy_protocol.protocol.ProxyMessageEncoder;
 
+import org.apache.logging.log4j.core.jmx.Server;
+
 import io.netty.bootstrap.Bootstrap;
+import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
+import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import io.netty.handler.codec.http.HttpClientCodec;
 import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.HttpServerCodec;
 import lombok.extern.slf4j.Slf4j;
@@ -64,7 +71,14 @@ public class ProxyClient {
     //手机的代理客户端
     private Bootstrap appBootstrap;
 
+    //手机的请求转发服务端
+    private ServerBootstrap serverBootstrap;
+
+
     private NioEventLoopGroup workerGroup;
+
+
+    private NioEventLoopGroup bossWokerGroup;
 
 
 
@@ -87,12 +101,46 @@ public class ProxyClient {
      */
     public static ProxyClient start(String serverHost, int serverPort, final String clientID) {
         ProxyClient proxyClient = new ProxyClient(serverHost, serverPort, clientID);
+        //启动littleProxy服务器
+        proxyClient.startLittleProxy();
         proxyClient.startInernal();
-        //TODO 确保3128已经建立连接后才能发送认证消息
-        //开启本地3128端口
-        Launcher.startHttpProxyService(3128);
-
         return proxyClient;
+    }
+
+    /**
+     * 建立手机端的3128端口的服务器
+     */
+    private void startLittleProxy(){
+        bossWokerGroup = new NioEventLoopGroup();
+        workerGroup = new NioEventLoopGroup();
+
+        serverBootstrap = new ServerBootstrap()
+                .group(bossWokerGroup,workerGroup)
+                .channel(NioServerSocketChannel.class)
+                .childHandler(new ChannelInitializer<SocketChannel>() {
+                    @Override
+                    protected void initChannel(SocketChannel ch) throws Exception {
+                        ch.pipeline()
+                                .addLast(new HttpServerCodec())
+                                .addLast(new HttpObjectAggregator(Integer.MAX_VALUE));
+//                                .addLast(new HttpConnectHandler(ctx));
+                        // HTTP消息处理handler
+                        ch.pipeline().addLast(new HttpMsgHandler());
+                    }
+                });
+
+        log.info("开启littleProxy服务器 ,port: "+ Constants.littleProxyPort);
+        serverBootstrap.bind(Constants.littleProxyPort).addListener(new ChannelFutureListener() {
+            @Override
+            public void operationComplete(ChannelFuture future) throws Exception {
+                if (future.isSuccess()){
+                    log.info(tag,"littleProxy server start successfully");
+                }else{
+                    log.error(tag,"littleProxy server start failed");
+                }
+            }
+        });
+
     }
 
 
@@ -113,24 +161,25 @@ public class ProxyClient {
                     }
                 });
 
-//        connectSelfServer();
-        connectServer();
+        connectSelfServer();
+//        connectServer();
     }
 
     /**
      * 连接3128端口的内网服务器
      */
     private void connectSelfServer(){
-        appBootstrap.connect("127.0.0.1",3128).addListener(new ChannelFutureListener() {
+        appBootstrap.connect("127.0.0.1",Constants.littleProxyPort).addListener(new ChannelFutureListener() {
             @Override
             public void operationComplete(ChannelFuture future) throws Exception {
                 if (future.isSuccess()){
-                    LogUtil.i(tag,"连接3128端口的服务器成功");
+                    LogUtil.i(tag,"连接littleProxy服务器成功,端口："+Constants.littleProxyPort);
                     connectServer();
+
                     //将channel给保存起来
                     manageChannelMap.put(Constants.LOCAL_SERVER_CHANNEL,future.channel());
                 }else{
-                    LogUtil.e(tag,"连接3128端口的服务器失败");
+                    LogUtil.e(tag,"连接littleProxy服务器失败,端口："+Constants.littleProxyPort);
                     reconnectWait();
                     connectSelfServer();
                 }
@@ -139,10 +188,10 @@ public class ProxyClient {
         });
     }
 
+
     /**
      * 连接请求服务器
      */
-
     private void connectServer(){
         appBootstrap.connect(serverHost,serverPort).addListener(new ChannelFutureListener() {
             @Override

@@ -78,9 +78,16 @@ public class AppClientChannelHandler extends SimpleChannelInboundHandler<ProxyMe
 
         byte[] data  = msg.getData();
 
-        littleProxyChannel.writeAndFlush(data);
+//        LogUtil.i("TEST",new String(data));
+
+        ByteBuf encoded = ctx.alloc().buffer(4 * data.length);
+        encoded.writeBytes(data);
+
+        littleProxyChannel.writeAndFlush(encoded);
 
     }
+
+
     /**
      * 处理连接请求
      * TODO 废弃的请求

@@ -30,4 +30,8 @@ public interface Constants {
     // clientId 和 Channel 的绑定
     Map<String, Channel> manageChannelMap = new ConcurrentHashMap<String, Channel>();
 
+
+    // littleProxy开启的端口为3128
+    int littleProxyPort = 3128;
+
 }
