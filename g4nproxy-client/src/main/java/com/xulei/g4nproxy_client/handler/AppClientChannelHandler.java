@@ -1,15 +1,20 @@
 package com.xulei.g4nproxy_client.handler;
 
 
+import com.xulei.g4nproxy_client.ChannelStatusListener;
 import com.xulei.g4nproxy_client.Constants;
+import com.xulei.g4nproxy_client.ProxyClient;
 import com.xulei.g4nproxy_client.util.LogUtil;
 import com.xulei.g4nproxy_protocol.protocol.ProxyMessage;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
+import io.netty.handler.timeout.IdleState;
+import io.netty.handler.timeout.IdleStateEvent;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -22,6 +27,14 @@ public class AppClientChannelHandler extends SimpleChannelInboundHandler<ProxyMe
 
     private static final String tag = "appClient_tag";
 
+    private ProxyClient proxyClient;
+
+    private ChannelStatusListener channelStatusListener;
+
+    public AppClientChannelHandler(ChannelStatusListener channelStatusListener, ProxyClient proxyClient){
+        this.proxyClient = proxyClient;
+        this.channelStatusListener = channelStatusListener;
+    }
 
 
     @Override
@@ -38,6 +51,9 @@ public class AppClientChannelHandler extends SimpleChannelInboundHandler<ProxyMe
             case ProxyMessage.P_TYPE_TRANSFER:
                 handleTransferMessage(ctx, msg);
                 break;
+//            case ProxyMessage.TYPE_DISCONNECT:
+//                handleDisconnectMessage(ctx,msg);
+//                break;
         }
 
 
@@ -57,6 +73,11 @@ public class AppClientChannelHandler extends SimpleChannelInboundHandler<ProxyMe
         super.channelActive(ctx);
     }
 
+    /**
+     * 接受服务器的确定连接响应
+     * @param ctx
+     * @param message
+     */
     private void handleAuthMessage(ChannelHandlerContext ctx,ProxyMessage message){
 
 
@@ -65,7 +86,6 @@ public class AppClientChannelHandler extends SimpleChannelInboundHandler<ProxyMe
 
 
     /**
-     * TODO 真正的代理实现
      * 处理传输数据的请求
      * @param ctx
      * @param msg
@@ -85,29 +105,64 @@ public class AppClientChannelHandler extends SimpleChannelInboundHandler<ProxyMe
 
     }
 
+//    /**
+//     * 断开连接处理逻辑
+//     * @param ctx
+//     * @param msg
+//     */
+//    private void handleDisconnectMessage(ChannelHandlerContext ctx,ProxyMessage msg){
+//        Channel littleProxyServerChannel = ctx.channel().attr(Constants.NEXT_CHANNEL).get();
+//        LogUtil.i(tag, "handleDisconnectMessage, :" + littleProxyServerChannel);
+//        if (littleProxyServerChannel != null) {
+//            ctx.channel().attr(Constants.NEXT_CHANNEL).remove();
+//            // 将channel 返回代理池中
+//            proxyClient.getClientChannelManager().returnProxyChannel(ctx.channel());
+//            // 清空channel中的剩余消息
+//            littleProxyServerChannel.writeAndFlush(Unpooled.EMPTY_BUFFER).addListener(ChannelFutureListener.CLOSE);
+//        }
+//    }
 
     /**
-     * 处理连接请求
-     * TODO 废弃的请求
+     * 事件触发
+     *
      * @param ctx
-     * @param msg
+     * @param evt
+     * @throws Exception
      */
-    private void handleConnectMessages(ChannelHandlerContext ctx, ProxyMessage msg){
+    @Override
+    public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
+        if (evt instanceof IdleStateEvent) {
+            IdleStateEvent idleStateEvent = (IdleStateEvent) evt;
+            if (idleStateEvent.state() == IdleState.WRITER_IDLE) {
+                LogUtil.w(tag, "已经 10 秒没有发送信息！");
+                //向服务端发送消息
 
-        LogUtil.i(tag,"进入连接处理模块");
-
-        //获取数据传输的channel
-        Channel dataChannel = ctx.channel().attr(com.xulei.g4nproxy_protocol.protocol.Constants.NEXT_CHANNEL).get();
-        ProxyMessage testMesage = new ProxyMessage();
-        testMesage.setData(testData());
-        testMesage.setUri("test");
-        dataChannel.writeAndFlush(testMesage);
-
-        //测试数据发回的位置
-        testMesage.setUri("testCTX");
-        ctx.channel().writeAndFlush(testMesage);
-
+            }
+        }
+        super.userEventTriggered(ctx, evt);
     }
+
+    @Override
+    public void channelInactive(ChannelHandlerContext ctx) throws Exception {
+
+        // 控制连接
+        if (proxyClient.getClientChannelManager().getCmdChannel() == ctx.channel()) {
+            proxyClient.getClientChannelManager().setCmdChannel(null);
+            proxyClient.getClientChannelManager().clearRealServerChannels();
+            channelStatusListener.channelInactive(ctx);
+        } else {
+            // 数据传输连接
+            Channel realServerChannel = ctx.channel().attr(Constants.NEXT_CHANNEL).get();
+            if (realServerChannel != null && realServerChannel.isActive()) {
+                realServerChannel.close();
+            }
+        }
+
+        proxyClient.getClientChannelManager().removeProxyChannel(ctx.channel());
+        super.channelInactive(ctx);
+    }
+
+
 
 
     @Override
@@ -119,14 +174,5 @@ public class AppClientChannelHandler extends SimpleChannelInboundHandler<ProxyMe
     }
 
 
-
-    private byte[] testData(){
-        ByteBuf buf = Unpooled.buffer(10);
-        byte[] bytes = {1,2,3,4,5};
-        buf.writeBytes(bytes);
-
-//        return buf;
-        return bytes;
-    }
 
 }

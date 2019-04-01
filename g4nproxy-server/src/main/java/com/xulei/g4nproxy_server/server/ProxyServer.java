@@ -5,6 +5,7 @@ import com.xulei.g4nproxy_protocol.protocol.Constants;
 import com.xulei.g4nproxy_protocol.protocol.ProxyMessageDecoder;
 import com.xulei.g4nproxy_protocol.protocol.ProxyMessageEncoder;
 import com.xulei.g4nproxy_server.handler.NatServerChannelHandler;
+import com.xulei.g4nproxy_server.handler.ServerIdleCheckHandler;
 import com.xulei.g4nproxy_server.handler.UserMappingChannelHandler;
 import com.xulei.g4nproxy_server.util.LogUtil;
 
@@ -73,10 +74,6 @@ public class ProxyServer {
 
         ChannelFuture channelFuture = userMapServerBootStrap.bind(port);
 
-        //根据端口来获取到natServerChannel
-        Channel natDataChannel = ProxyChannelManager.getCmdChannel(Constants.g4nproxyServerPort);
-
-        Channel userMappingChannel = channelFuture.channel();
 
         try {
             channelFuture.get();
@@ -113,7 +110,7 @@ public class ProxyServer {
             public void initChannel(SocketChannel ch) throws Exception {
                 ch.pipeline().addLast(Constants.PROXY_MESSAGE_DECODE,new ProxyMessageDecoder(MAX_FRAME_LENGTH, LENGTH_FIELD_OFFSET, LENGTH_FIELD_LENGTH, LENGTH_ADJUSTMENT, INITIAL_BYTES_TO_STRIP));
                 ch.pipeline().addLast(Constants.PROXY_MESSAGE_ENCODE,new ProxyMessageEncoder());
-//                ch.pipeline().addLast(new ServerIdleCheckHandler());
+                ch.pipeline().addLast(new ServerIdleCheckHandler());
                 ch.pipeline().addLast(new NatServerChannelHandler());
             }
         });
@@ -131,16 +128,6 @@ public class ProxyServer {
                 .childHandler(new ChannelInitializer<SocketChannel>() {
                     @Override
                     protected void initChannel(SocketChannel ch) throws Exception {
-//                        ch.pipeline().addLast(new ProxyMessageDecoder(MAX_FRAME_LENGTH, LENGTH_FIELD_OFFSET, LENGTH_FIELD_LENGTH, LENGTH_ADJUSTMENT, INITIAL_BYTES_TO_STRIP));
-//                        ch.pipeline().addLast(new ProxyMessageEncoder());
-//                        ch.pipeline().addLast(NAME_HTTPSERVER_CODEC,new HttpServerCodec());
-//                                /**
-//                                 * /**usually we receive http message infragment,if we want full http message,
-//                                 * we should bundle HttpObjectAggregator and we can get FullHttpRequest。
-//                                 * 我们通常接收到的是一个http片段，如果要想完整接受一次请求的所有数据，我们需要绑定HttpObjectAggregator，然后我们
-//                                 * 就可以收到一个FullHttpRequest-是一个完整的请求信息。
-//                                 **/
-//                        ch.pipeline().addLast(NAME_HTTP_AGGREGATOR_HANDLER,new HttpObjectAggregator(1024*1024)); //定义缓冲区数据量大小
                         ch.pipeline().addLast(new UserMappingChannelHandler());
                     }
                 });

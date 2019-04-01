@@ -15,10 +15,12 @@ import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
+import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import io.netty.handler.timeout.IdleStateHandler;
 import lombok.extern.slf4j.Slf4j;
 
 import static com.xulei.g4nproxy_client.Constants.APP_CLIENT_HANDLER;
@@ -33,7 +35,7 @@ import static com.xulei.g4nproxy_client.Constants.manageChannelMap;
 
 
 @Slf4j
-public class ProxyClient {
+public class ProxyClient implements ChannelStatusListener {
 
 
 
@@ -56,6 +58,7 @@ public class ProxyClient {
     private int serverPort;
     private String clientID;
 
+
     private ClientChannelManager clientChannelManager;
 
     //手机的代理客户端
@@ -76,6 +79,10 @@ public class ProxyClient {
 
 
     }
+
+
+    public ClientChannelManager getClientChannelManager(){return clientChannelManager;}
+
 
     /**
      * 启动内网穿透客户端
@@ -103,7 +110,7 @@ public class ProxyClient {
 
             @Override
             public void initChannel(SocketChannel ch) throws Exception {
-                ch.pipeline().addLast(new LittleProxyServerChannelHandler());
+                ch.pipeline().addLast(new LittleProxyServerChannelHandler(ProxyClient.this));
             }
         });
 
@@ -118,7 +125,7 @@ public class ProxyClient {
                         ch.pipeline().addLast(PROXY_MESSAGE_DECODE,new ProxyMessageDecoder(MAX_FRAME_LENGTH, LENGTH_FIELD_OFFSET, LENGTH_FIELD_LENGTH, LENGTH_ADJUSTMENT, INITIAL_BYTES_TO_STRIP));
 
                         ch.pipeline().addLast(new ClientIdleCheckHandler());
-                        ch.pipeline().addLast(APP_CLIENT_HANDLER,new AppClientChannelHandler());
+                        ch.pipeline().addLast(APP_CLIENT_HANDLER,new AppClientChannelHandler(ProxyClient.this,ProxyClient.this));
                     }
                 });
         //TODO 添加sleep时间，避免内网服务器连接失败
@@ -193,6 +200,7 @@ public class ProxyClient {
     }
 
 
+
     private static void reconnectWait() {
         try {
             if (sleepTimeMill > 60000) {
@@ -207,4 +215,9 @@ public class ProxyClient {
         }
     }
 
+    @Override
+    public void channelInactive(ChannelHandlerContext ctx) {
+        reconnectWait();
+        connectSelfServer();
+    }
 }

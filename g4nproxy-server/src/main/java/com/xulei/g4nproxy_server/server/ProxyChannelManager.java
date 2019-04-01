@@ -3,6 +3,7 @@ package com.xulei.g4nproxy_server.server;
 import com.xulei.g4nproxy_protocol.protocol.Constants;
 import com.xulei.g4nproxy_protocol.protocol.ProxyMessage;
 
+import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -26,7 +27,7 @@ public class ProxyChannelManager {
     // channel 对应的port
     private static final AttributeKey<Integer> CHANNEL_PORT = AttributeKey.newInstance("channel_port");
     // channel 中连接的clientId
-    private static final AttributeKey<String> CHANNEL_CLIENT_KEY = AttributeKey.newInstance("channel_client_key");
+    public static final AttributeKey<String> CHANNEL_CLIENT_KEY = AttributeKey.newInstance("channel_client_key");
 
     //
     private static final AttributeKey<Map<String, Channel>> USER_CHANNELS = AttributeKey.newInstance("user_channels");
@@ -129,6 +130,61 @@ public class ProxyChannelManager {
     }
 
 
+    /**
+     * 代理客户端连接断开后清除关系
+     *
+     * @param channel
+     */
+    public static void removeCmdChannel(Channel channel) {
+        log.warn("channel closed, clear user channels, {}", channel);
+        if (channel.attr(CHANNEL_PORT).get() == null) {
+            // data channel ,just close
+            channel.close();
+            return;
+        }
+
+        String clientKey = channel.attr(CHANNEL_CLIENT_KEY).get();
+        Channel channel0 = cmdChannels.remove(clientKey);
+        if (channel != channel0) {
+            cmdChannels.put(clientKey, channel);
+        }
+
+        Integer port = channel.attr(CHANNEL_PORT).get();
+        Channel proxyChannel = portCmdChannelMapping.remove(port);
+        if (proxyChannel != null && proxyChannel != channel) {
+            // 在执行断连之前新的连接已经连上来了
+            portCmdChannelMapping.put(port, proxyChannel);
+        }
+
+        if (channel.isActive()) {
+            log.info("disconnect proxy channel {}", channel);
+            channel.close();
+        }
+
+        ProxyServer.getInstance().closeMappingPort(port);
+
+
+        Map<String, Channel> userChannels = getUserChannels(channel);
+        Iterator<String> ite = userChannels.keySet().iterator();
+        while (ite.hasNext()) {
+            Channel userChannel = userChannels.get(ite.next());
+            if (userChannel.isActive()) {
+                userChannel.close();
+                log.info("disconnect user channel {}", userChannel);
+            }
+        }
+    }
+
+
+    /**
+     * 获取代理控制客户端连接绑定的所有用户连接
+     *
+     * @param cmdChannel
+     * @return
+     */
+    public static Map<String, Channel> getUserChannels(Channel cmdChannel) {
+        return cmdChannel.attr(USER_CHANNELS).get();
+    }
 
     /**
      * 获取用户编号

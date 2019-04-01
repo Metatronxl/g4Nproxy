@@ -9,7 +9,6 @@ import java.util.concurrent.LinkedBlockingQueue;
 /**
  * 服务器端的可用端口
  *
- * 一个channel会占用多个端口
  * @author lei.X
  * @date 2019/3/18 5:00 PM
  */
@@ -53,6 +52,14 @@ public class AvailablePortManager {
         }
     }
 
+    /**
+     * 获取一个历史可用port
+     * or
+     * 生成一个新的port
+     *
+     * @param clientKey
+     * @return
+     */
     public Integer poll(String clientKey){
         Integer historyBind = agentPortResourceMap.get(clientKey);
         if (historyBind != null){

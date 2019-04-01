@@ -12,6 +12,8 @@ import io.netty.util.AttributeKey;
  */
 
 public interface Constants {
+
+
     public static final String httpProxyServiceAction = "om.virjar.g4proxy.service";
 
 
@@ -37,4 +39,5 @@ public interface Constants {
 
     AttributeKey<Channel> NEXT_CHANNEL = AttributeKey.newInstance("nxt_channel");
 
+    AttributeKey<String> USER_ID = AttributeKey.newInstance("user_id");
 }

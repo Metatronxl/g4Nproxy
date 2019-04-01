@@ -3,23 +3,16 @@ package com.xulei.g4nproxy_server.handler;
 import com.xulei.g4nproxy_protocol.protocol.Constants;
 import com.xulei.g4nproxy_protocol.protocol.ProxyMessage;
 import com.xulei.g4nproxy_server.server.ProxyChannelManager;
-import com.xulei.g4nproxy_server.server.ProxyServer;
-import com.xulei.g4nproxy_server.util.ByteArrayUtil;
-import com.xulei.g4nproxy_server.util.CtxUtil;
 import com.xulei.g4nproxy_server.util.LogUtil;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
-import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelId;
 import io.netty.channel.SimpleChannelInboundHandler;
-import io.netty.util.concurrent.EventExecutorGroup;
 import lombok.extern.slf4j.Slf4j;
-import sun.rmi.runtime.Log;
 
 /**
  *
@@ -58,9 +51,9 @@ public class NatServerChannelHandler extends SimpleChannelInboundHandler<ProxyMe
             case ProxyMessage.P_TYPE_TANSFER_RTN:
                 handleMessageRtn(ctx,msg);
                 break;
-//            case ProxyMessage.TYPE_CONNECT:
-//                handleConnectMessage(ctx,msg);
-//                break;
+            case ProxyMessage.TYPE_DISCONNECT:
+                handleDisconnectMessage(ctx,msg);
+                break;
             case ProxyMessage.P_TYPE_TRANSFER:
                 handleTransferMessage(ctx,msg);
                 break;
@@ -78,8 +71,6 @@ public class NatServerChannelHandler extends SimpleChannelInboundHandler<ProxyMe
         //获取到对应的userChannel
         Channel userMappingChannel  = ctx.channel().attr(Constants.NEXT_CHANNEL).get();
         String userId =  userMappingChannel.id().asShortText();
-
-//        LogUtil.i("TTTTTTTTT", new String(proxyMessage.getData()));
 
         if (userMappingChannel!=null){
             LogUtil.i(tag,"处理4g代理服务器返回的数据");
@@ -110,6 +101,7 @@ public class NatServerChannelHandler extends SimpleChannelInboundHandler<ProxyMe
 
     /**
      * 认证消息，检测clientKey是否正确
+     * && 连接建立处理
      *
      * @param ctx
      * @param proxyMessage
@@ -127,19 +119,50 @@ public class NatServerChannelHandler extends SimpleChannelInboundHandler<ProxyMe
         responseMsg.setType(ProxyMessage.C_TYPE_AUTH);
         responseMsg.setData(bytes);
 
-        //去掉ProxyMessage编解码器
-//        ctx.pipeline().remove(Constants.PROXY_MESSAGE_DECODE);
-//        ctx.pipeline().remove(Constants.PROXY_MESSAGE_ENCODE);
 
         //发送认证消息给4g代理服务器
         ctx.writeAndFlush(responseMsg);
-//                .addListener(new ChannelFutureListener() {
-//            @Override
-//            public void operationComplete(ChannelFuture future) throws Exception {
-//                //发送完数据后再添加上
-//                CtxUtil.AddProxyMessageHandler(future.channel());
-//            }
-//        });
+
+
+    }
+
+    /**
+     * 代理后端服务器断开连接消息
+     * @param ctx
+     * @param proxyMessage
+     */
+    private void handleDisconnectMessage(ChannelHandlerContext ctx, ProxyMessage proxyMessage){
+
+        String clientKey = ctx.channel().attr(Constants.CLIENT_KEY).get();
+
+        // 代理连接没有连上服务器由控制连接发送用户端断开连接消息
+        if (clientKey == null) {
+            String userId = proxyMessage.getUri();
+            Channel userChannel = ProxyChannelManager.removeUserChannelFromCmdChannel(ctx.channel(), userId);
+            if (userChannel != null) {
+                // 数据发送完成后再关闭连接，解决http1.0数据传输问题
+                userChannel.writeAndFlush(Unpooled.EMPTY_BUFFER).addListener(ChannelFutureListener.CLOSE);
+            }
+            return;
+        }
+
+        Channel cmdChannel = ProxyChannelManager.getCmdChannel(clientKey);
+        if (cmdChannel == null) {
+            log.warn("ConnectMessage:error cmd channel key {}", ctx.channel().attr(Constants.CLIENT_KEY).get());
+            return;
+        }
+
+        Channel userChannel = ProxyChannelManager.removeUserChannelFromCmdChannel(cmdChannel, ctx.channel().attr(Constants.USER_ID).get());
+        if (userChannel != null) {
+            // 数据发送完成后再关闭连接，解决http1.0数据传输问题
+            userChannel.writeAndFlush(Unpooled.EMPTY_BUFFER).addListener(ChannelFutureListener.CLOSE);
+            ctx.channel().attr(Constants.NEXT_CHANNEL).set(null);
+            ctx.channel().attr(Constants.CLIENT_KEY).set(null);
+            ctx.channel().attr(Constants.USER_ID).set(null);
+
+
+            //TODO 将端口返回给availablePortMap
+        }
 
     }
 

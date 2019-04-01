@@ -1,6 +1,7 @@
 package com.xulei.g4nproxy_client.handler;
 
 import com.xulei.g4nproxy_client.Constants;
+import com.xulei.g4nproxy_client.ProxyClient;
 import com.xulei.g4nproxy_client.util.LogUtil;
 import com.xulei.g4nproxy_protocol.protocol.ProxyMessage;
 
@@ -17,6 +18,15 @@ public class LittleProxyServerChannelHandler extends SimpleChannelInboundHandler
 
 
     private static final String tag = "LittleProxyServerChannelHandler";
+
+
+    private ProxyClient proxyClient;
+
+    public LittleProxyServerChannelHandler(ProxyClient proxyClient) {
+        this.proxyClient = proxyClient;
+    }
+
+
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, ByteBuf buf) throws Exception {
@@ -37,4 +47,37 @@ public class LittleProxyServerChannelHandler extends SimpleChannelInboundHandler
             LogUtil.i(tag, "http响应数据写回, littleProxyChannel:" + littleProxyChannel + "  natDataChannel " + natDataChannel);
         }
     }
+
+    /**
+     * channel断开连接时发送TYPE_DISCONNECT包
+     * @param ctx
+     * @throws Exception
+     */
+//    @Override
+//    public void channelInactive(ChannelHandlerContext ctx) throws Exception {
+//        Channel littleProxyChannel = ctx.channel();
+//        String userId = proxyClient.getClientChannelManager().getRealServerChannelUserId(littleProxyChannel);
+//        proxyClient.getClientChannelManager().removeRealServerChannel(userId);  // 通道关闭后就将这个userId移除
+//        Channel channel = littleProxyChannel.attr(Constants.NEXT_CHANNEL).get();
+//        if (channel != null) {
+//            LogUtil.i(tag, "channelInactive :" + littleProxyChannel);
+//            ProxyMessage proxyMessage = new ProxyMessage();
+//            proxyMessage.setType(ProxyMessage.TYPE_DISCONNECT);
+//            proxyMessage.setUri(userId);
+//            channel.writeAndFlush(proxyMessage);  // 发送通知过去，告之这个代理服务器已经失去连接
+//
+//            //TODO 这里的逻辑处理有些粗糙，可能存在的情况是4g代理与littleProxy之间的连接断开，但是请求服务器与4g代理之间的链接并没有断开，这个时候需要做的是重新连接4g代理与littleProxy
+//
+//        }
+//        super.channelInactive(ctx);
+//    }
+
+    @Override
+    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+        LogUtil.e(tag, "exception caught", cause);
+        super.exceptionCaught(ctx, cause);
+    }
+
+
+
 }
