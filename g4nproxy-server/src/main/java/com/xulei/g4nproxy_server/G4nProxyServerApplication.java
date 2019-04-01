@@ -20,8 +20,9 @@ class G4nProxyServerApplication extends SpringBootServletInitializer{
 
     public static void main(String[] args) {
 
+        InputStream resourceAsStream = G4nProxyServerApplication.class.getClassLoader().getResourceAsStream("application.properties");
+        System.out.println(resourceAsStream);
         ProxyServer.getInstance().start();
-
         SpringApplication.run(G4nProxyServerApplication.class, args);
 
     }

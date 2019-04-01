@@ -166,6 +166,7 @@ public class UserMappingChannelHandler extends SimpleChannelInboundHandler<ByteB
 
                 natDataChannel.config().setOption(ChannelOption.AUTO_READ, true);
                 // 通知客户端，用户连接已经断开
+                //TODO 连接断开后回收端口
                 ProxyMessage proxyMessage = new ProxyMessage();
                 proxyMessage.setType(ProxyMessage.TYPE_DISCONNECT);
                 proxyMessage.setUri(userId);
