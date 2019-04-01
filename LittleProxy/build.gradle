@@ -1,0 +1,16 @@
+apply plugin: 'java-library'
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation 'io.netty:netty-codec-http:4.0.44.Final'
+    implementation 'org.slf4j:slf4j-api:1.7.24'
+    implementation 'com.google.guava:guava:23.4-android'
+    implementation 'org.apache.commons:commons-lang3:3.7'
+    implementation ('org.littleshoot:dnssec4j:0.1.6'){
+        exclude module: 'slf4j-log4j12'
+    }
+
+}
+
+sourceCompatibility = "1.7"
+targetCompatibility = "1.7"

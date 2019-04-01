@@ -71,19 +71,17 @@ public class AppClientChannelHandler extends SimpleChannelInboundHandler<ProxyMe
      * @param msg
      */
     private void handleTransferMessage(ChannelHandlerContext ctx,ProxyMessage msg){
-        // 测试返回是否成功
-        LogUtil.w(tag,"代理服务器处理传输数据的请求");
 
-        Channel littleProxyChannel = Constants.manageChannelMap.get(Constants.LOCAL_SERVER_CHANNEL);
 
-        byte[] data  = msg.getData();
-
-//        LogUtil.i("TEST",new String(data));
-
-        ByteBuf encoded = ctx.alloc().buffer(4 * data.length);
-        encoded.writeBytes(data);
-
-        littleProxyChannel.writeAndFlush(encoded);
+        Channel littleProxyServerChannel = ctx.channel().attr(Constants.NEXT_CHANNEL).get();
+        if (littleProxyServerChannel == null){
+            LogUtil.w(tag,"littleProxy Connection lost");
+            return;
+        }
+        ByteBuf buf = ctx.alloc().buffer(msg.getData().length);
+        buf.writeBytes(msg.getData());
+        LogUtil.i(tag,"将请求数据写入littleProxy server,"+littleProxyServerChannel);
+        littleProxyServerChannel.writeAndFlush(buf);
 
     }
 
@@ -120,30 +118,6 @@ public class AppClientChannelHandler extends SimpleChannelInboundHandler<ProxyMe
         ctx.close();
     }
 
-
-    /**
-     * 和 目标主机 建立连接
-     */
-//    private ChannelFuture connectAppBootStrap(ChannelHandlerContext ctx, Object msg){
-//
-//        //建立一个BootStrap
-//        BootStrapFactory bootStrapFactory = new BootStrapFactory();
-//        Bootstrap bootstrap = bootStrapFactory.build();
-//
-//        return bootstrap.handler(new AppClientChannelHandler(ctx))
-//
-//
-//
-//        if (isHttp){
-//            return bootstrap.handler(new HttpConnectChannelInitializer(ctx))
-//                    .connect(address)
-//                    .addListener(new HttpChannelFutureListener(msg,ctx));
-//        }
-//        //如果为https请求
-//        return bootstrap.handler(new HttpsConnectChannelInitializer(ctx))
-//                .connect(address)
-//                .addListener(new HttpsChannelFutureListener(msg,ctx));
-//    }
 
 
     private byte[] testData(){

@@ -1,1 +1,1 @@
-include ':app', ':g4nproxy-protocol', ':g4nproxy-server', ':g4nproxy-client'
+include ':app', ':g4nproxy-protocol', ':g4nproxy-server', ':g4nproxy-client', ':LittleProxy'

@@ -14,7 +14,7 @@ import io.netty.channel.ChannelPromise;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GenericFutureListener;
 import lombok.extern.slf4j.Slf4j;
-import sun.rmi.runtime.Log;
+
 
 import static com.xulei.g4nproxy_client.util.ProxyUtil.wrapperTransFormData;
 
@@ -33,11 +33,11 @@ public class HttpResponseHandler extends ChannelInboundHandlerAdapter {
      * 与客户端连接的处理器(ProxyServerHandler)中的ctx,
      * 用于将目标主机响应的消息 发送回 客户端
      */
-    private final ChannelHandlerContext ctx;
-
-    public HttpResponseHandler(ChannelHandlerContext ctx) {
-        this.ctx = ctx;
-    }
+//    private final ChannelHandlerContext ctx;
+//
+//    public HttpResponseHandler(ChannelHandlerContext ctx) {
+//        this.ctx = ctx;
+//    }
 
 
     /**

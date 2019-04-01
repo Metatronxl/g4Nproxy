@@ -4,7 +4,7 @@ package com.xulei.g4nproxy_client.util;
  * @author lei.X
  * @date 2019/3/25 5:00 PM
  */
-import org.apache.log4j.xml.DOMConfigurator;
+//import org.apache.log4j.xml.DOMConfigurator;
 import org.littleshoot.proxy.HttpProxyServerBootstrap;
 import org.littleshoot.proxy.impl.DefaultHttpProxyServer;
 import org.slf4j.Logger;
@@ -35,7 +35,6 @@ public class Launcher {
      * @param port Any command line arguments.
      */
     public static void startHttpProxyService(int port) {
-        pollLog4JConfigurationFileIfAvailable();
 
         System.out.println("About to start server on port: " + port);
         HttpProxyServerBootstrap bootstrap = DefaultHttpProxyServer
@@ -48,11 +47,4 @@ public class Launcher {
         bootstrap.start();
     }
 
-    private static void pollLog4JConfigurationFileIfAvailable() {
-        File log4jConfigurationFile = new File("src/test/resources/log4j.xml");
-        if (log4jConfigurationFile.exists()) {
-            DOMConfigurator.configureAndWatch(
-                    log4jConfigurationFile.getAbsolutePath(), 15);
-        }
-    }
 }

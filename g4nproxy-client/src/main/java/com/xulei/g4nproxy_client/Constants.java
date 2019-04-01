@@ -5,6 +5,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.util.AttributeKey;
 
 /**
  * Created by virjar on 2019/2/23.
@@ -33,5 +34,7 @@ public interface Constants {
 
     // littleProxy开启的端口为3128
     int littleProxyPort = 3128;
+
+    AttributeKey<Channel> NEXT_CHANNEL = AttributeKey.newInstance("nxt_channel");
 
 }

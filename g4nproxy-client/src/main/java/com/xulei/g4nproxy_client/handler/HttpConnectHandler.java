@@ -79,7 +79,7 @@ public class HttpConnectHandler extends ChannelInboundHandlerAdapter {
 //        ctx0.fireChannelRead(msg);
 
 
-        //发回给客户端(返回的数据还未经过HttpServerCodec解码)
+        //发回给客户端
         ProxyUtil.writeAndFlush(ctx, msg, true);
 
 //        LogUtil.i("test msg kind",msg.toString());

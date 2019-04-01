@@ -78,11 +78,18 @@ public class NatServerChannelHandler extends SimpleChannelInboundHandler<ProxyMe
         //获取到对应的userChannel
         Channel userMappingChannel  = ctx.channel().attr(Constants.NEXT_CHANNEL).get();
         String userId =  userMappingChannel.id().asShortText();
-        LogUtil.i("userMappingChannelId 2: ",userId);
 
-        LogUtil.w(tag,"处理4g代理服务器返回的数据"+new String(proxyMessage.getData()));
-//        LogUtil.i("TTTTTTTTT", ByteArrayUtil.msgToString(proxyMessage.getData()));
-        userMappingChannel.writeAndFlush(proxyMessage.getData());
+//        LogUtil.i("TTTTTTTTT", new String(proxyMessage.getData()));
+
+        if (userMappingChannel!=null){
+            LogUtil.i(tag,"处理4g代理服务器返回的数据");
+            ByteBuf buf = ctx.alloc().buffer(proxyMessage.getData().length);
+            buf.writeBytes(proxyMessage.getData());
+            userMappingChannel.writeAndFlush(buf);
+        }else{
+            LogUtil.e(tag,"userMappingChannel 已经关闭！");
+        }
+
 
     }
 
