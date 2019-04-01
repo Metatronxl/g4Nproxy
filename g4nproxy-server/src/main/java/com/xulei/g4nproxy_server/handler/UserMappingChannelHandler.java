@@ -138,6 +138,13 @@ public class UserMappingChannelHandler extends SimpleChannelInboundHandler<ByteB
         super.channelActive(ctx);
     }
 
+
+    /**
+     * 用户与代理服务器的请求断开
+     * @param ctx
+     * @throws Exception
+     */
+
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
 

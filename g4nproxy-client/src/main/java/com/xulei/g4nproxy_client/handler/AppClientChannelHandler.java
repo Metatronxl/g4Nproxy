@@ -105,11 +105,11 @@ public class AppClientChannelHandler extends SimpleChannelInboundHandler<ProxyMe
 
     }
 
-//    /**
-//     * 断开连接处理逻辑
-//     * @param ctx
-//     * @param msg
-//     */
+    /**
+     * 断开连接处理逻辑
+     * @param ctx
+     * @param msg
+     */
 //    private void handleDisconnectMessage(ChannelHandlerContext ctx,ProxyMessage msg){
 //        Channel littleProxyServerChannel = ctx.channel().attr(Constants.NEXT_CHANNEL).get();
 //        LogUtil.i(tag, "handleDisconnectMessage, :" + littleProxyServerChannel);
