@@ -28,7 +28,6 @@ public class ClientIdleCheckHandler extends IdleStateHandler {
         if (IdleStateEvent.FIRST_WRITER_IDLE_STATE_EVENT == evt) {
             ALOG.i(Constants.tag, "channel write timeout :" + ctx.channel());
             ProxyMessage proxyMessage = new ProxyMessage();
-            //TODO 测试
             proxyMessage.setSerialNumber(1111);
             proxyMessage.setType(ProxyMessage.TYPE_HEARTBEAT);
             ctx.channel().writeAndFlush(proxyMessage);

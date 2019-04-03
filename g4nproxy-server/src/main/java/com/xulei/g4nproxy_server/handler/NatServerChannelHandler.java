@@ -164,8 +164,6 @@ public class NatServerChannelHandler extends SimpleChannelInboundHandler<ProxyMe
             ctx.channel().attr(Constants.CLIENT_KEY).set(null);
             ctx.channel().attr(Constants.USER_ID).set(null);
 
-
-            //TODO 将端口返回给availablePortMap
         }
 
     }
