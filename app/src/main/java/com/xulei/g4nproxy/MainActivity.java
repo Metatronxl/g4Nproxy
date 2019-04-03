@@ -15,7 +15,7 @@ public class MainActivity extends AppCompatActivity {
 
         TextView textView = findViewById(R.id.text);
         String clientKey = Settings.System.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
-        textView.setText("device: " + clientKey);
+        textView.setText("device： "+clientKey);
 
         Intent intent = new Intent(this, HttpProxyService.class);
         startService(intent);

@@ -160,7 +160,7 @@ public class ProxyClient implements ChannelStatusListener {
      * 连接请求服务器
      * param channel
      */
-    private void connectServer(Channel join2LittleProxyBootStrapChannel){
+    private void connectServer(final Channel join2LittleProxyBootStrapChannel){
         appBootstrap.connect(serverHost,serverPort).addListener(new ChannelFutureListener() {
             @Override
             public void operationComplete(ChannelFuture future) throws Exception {

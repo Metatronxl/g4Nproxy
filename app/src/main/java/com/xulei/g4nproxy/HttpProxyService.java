@@ -14,6 +14,7 @@ import android.provider.Settings;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
+import com.xulei.g4nproxy_client.ProxyClient;
 import com.xulei.g4nproxy_protocol.protocol.Constants;
 import java.util.concurrent.atomic.AtomicBoolean;
 
