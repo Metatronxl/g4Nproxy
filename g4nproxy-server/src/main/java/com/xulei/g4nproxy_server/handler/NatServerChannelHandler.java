@@ -3,6 +3,7 @@ package com.xulei.g4nproxy_server.handler;
 import com.xulei.g4nproxy_protocol.protocol.Constants;
 import com.xulei.g4nproxy_protocol.protocol.ProxyMessage;
 import com.xulei.g4nproxy_server.server.ProxyChannelManager;
+import com.xulei.g4nproxy_server.server.ProxyServer;
 import com.xulei.g4nproxy_server.util.LogUtil;
 
 import io.netty.buffer.ByteBuf;
@@ -13,6 +14,7 @@ import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import lombok.extern.slf4j.Slf4j;
+import sun.rmi.runtime.Log;
 
 /**
  *
@@ -187,6 +189,28 @@ public class NatServerChannelHandler extends SimpleChannelInboundHandler<ProxyMe
 
 
     }
+
+    @Override
+
+    public void handlerRemoved(ChannelHandlerContext ctx) throws Exception {
+
+        // 获取到inactive对应的port
+        int port = ctx.channel().attr(Constants.SERVER_USER_PORT).get();
+        ProxyServer.getInstance().closeMappingPort(port);
+        LogUtil.i(tag,"端口："+ String.valueOf(port)+"对应的channel已经关闭");
+
+    }
+
+
+//    @Override
+//    public void channelInactive(ChannelHandlerContext ctx) throws Exception{
+//
+    //        // 获取到inactive对应的port
+    //        int port = ctx.channel().attr(Constants.SERVER_USER_PORT).get();
+    //        ProxyServer.getInstance().closeMappingPort(port);
+    //        LogUtil.i(tag,"端口："+ String.valueOf(port)+"对应的channel已经关闭");
+//        super.channelInactive(ctx);
+//    }
 
 
 

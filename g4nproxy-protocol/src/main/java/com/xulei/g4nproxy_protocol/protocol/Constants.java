@@ -7,6 +7,10 @@ public interface Constants {
 
     AttributeKey<Channel> SERVER_NEXT_CHANNEL = AttributeKey.newInstance("server_nxt_channel");
 
+
+    AttributeKey<Integer> SERVER_USER_PORT = AttributeKey.newInstance("server_user_port");
+
+
     AttributeKey<String> USER_ID = AttributeKey.newInstance("user_id");
 
     AttributeKey<String> CLIENT_KEY = AttributeKey.newInstance("client_key");

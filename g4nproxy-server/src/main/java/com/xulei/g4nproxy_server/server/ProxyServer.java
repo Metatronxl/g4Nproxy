@@ -79,6 +79,9 @@ public class ProxyServer {
             channelFuture.get();
             LogUtil.i(tag,"开启服务器的数据端口: "+String.valueOf(port));
 
+            //设置natDataChannel绑定的user的端口
+            Channel natDataChannel = ProxyChannelManager.getCmdChannel(port);
+            natDataChannel.attr(Constants.SERVER_USER_PORT).set(port);
 
 
 
