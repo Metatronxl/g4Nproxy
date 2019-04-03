@@ -5,8 +5,6 @@ import com.xulei.g4nproxy_server.server.ProxyServer;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
-import org.springframework.boot.web.server.WebServerFactory;
-import org.springframework.boot.web.server.WebServerFactoryCustomizer;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 
 import java.io.InputStream;
@@ -16,7 +14,7 @@ import java.io.InputStream;
  * @date 2019/3/18 10:43 AM
  */
 @SpringBootApplication
-class G4nProxyServerApplication extends SpringBootServletInitializer{
+public class G4nProxyServerApplication extends SpringBootServletInitializer{
 
     public static void main(String[] args) {
 

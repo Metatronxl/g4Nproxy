@@ -12,10 +12,8 @@ import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelOption;
 import io.netty.channel.SimpleChannelInboundHandler;
 import lombok.extern.slf4j.Slf4j;
-import sun.rmi.runtime.Log;
 
 
 /**
@@ -147,7 +145,7 @@ public class UserMappingChannelHandler extends SimpleChannelInboundHandler<ByteB
      * @param ctx
      * @throws Exception
      */
-
+//   TODO 连接断开的处理
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
 
@@ -169,7 +167,7 @@ public class UserMappingChannelHandler extends SimpleChannelInboundHandler<ByteB
 //
 //                natDataChannel.config().setOption(ChannelOption.AUTO_READ, true);
 //                // 通知客户端，用户连接已经断开
-//                //TODO 连接断开后回收端口
+
 //                ProxyMessage proxyMessage = new ProxyMessage();
 //                proxyMessage.setType(ProxyMessage.TYPE_DISCONNECT);
 //                proxyMessage.setUri(userId);
@@ -178,6 +176,7 @@ public class UserMappingChannelHandler extends SimpleChannelInboundHandler<ByteB
 //
 //        }
 //
+
 
 
         super.channelInactive(ctx);

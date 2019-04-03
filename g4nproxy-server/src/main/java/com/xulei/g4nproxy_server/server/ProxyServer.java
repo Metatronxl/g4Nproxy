@@ -11,7 +11,6 @@ import com.xulei.g4nproxy_server.util.LogUtil;
 
 import java.util.Collection;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;
@@ -20,12 +19,13 @@ import io.netty.channel.ChannelInitializer;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
-import io.netty.handler.codec.http.HttpObjectAggregator;
-import io.netty.handler.codec.http.HttpServerCodec;
-import io.netty.handler.timeout.IdleStateHandler;
 import lombok.extern.slf4j.Slf4j;
 
-import static com.xulei.g4nproxy_protocol.protocol.Constants.*;
+import static com.xulei.g4nproxy_protocol.protocol.Constants.INITIAL_BYTES_TO_STRIP;
+import static com.xulei.g4nproxy_protocol.protocol.Constants.LENGTH_ADJUSTMENT;
+import static com.xulei.g4nproxy_protocol.protocol.Constants.LENGTH_FIELD_LENGTH;
+import static com.xulei.g4nproxy_protocol.protocol.Constants.LENGTH_FIELD_OFFSET;
+import static com.xulei.g4nproxy_protocol.protocol.Constants.MAX_FRAME_LENGTH;
 /**
  * @author lei.X
  * @date 2019/3/18 10:43 AM
