@@ -133,8 +133,8 @@ public class AppClientChannelHandler extends SimpleChannelInboundHandler<ProxyMe
     public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
         if (evt instanceof IdleStateEvent) {
             IdleStateEvent idleStateEvent = (IdleStateEvent) evt;
-            if (idleStateEvent.state() == IdleState.WRITER_IDLE) {
-                LogUtil.w(tag, "已经 10 秒没有发送信息！");
+            if (idleStateEvent.state() == IdleState.READER_IDLE) {
+                LogUtil.w(tag, "已经 10 秒没有收到信息！");
                 //向服务端发送消息
 
             }

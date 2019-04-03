@@ -9,10 +9,13 @@ import com.xulei.g4nproxy_server.util.LogUtil;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
+import io.netty.handler.timeout.IdleState;
+import io.netty.handler.timeout.IdleStateEvent;
 import lombok.extern.slf4j.Slf4j;
 import sun.rmi.runtime.Log;
 
@@ -72,8 +75,6 @@ public class NatServerChannelHandler extends SimpleChannelInboundHandler<ProxyMe
     private void handleMessageRtn(ChannelHandlerContext ctx,ProxyMessage proxyMessage){
         //获取到对应的userChannel
         Channel userMappingChannel  = ctx.channel().attr(Constants.SERVER_NEXT_CHANNEL).get();
-        String userId =  userMappingChannel.id().asShortText();
-        LogUtil.i("TEST",userId);
 
         if (userMappingChannel!=null){
             LogUtil.i(tag,"处理4g代理服务器返回的数据");
@@ -97,8 +98,8 @@ public class NatServerChannelHandler extends SimpleChannelInboundHandler<ProxyMe
         ProxyMessage heartbeatMessage = new ProxyMessage();
         heartbeatMessage.setSerialNumber(heartbeatMessage.getSerialNumber());
         heartbeatMessage.setType(ProxyMessage.TYPE_HEARTBEAT);
+        heartbeatMessage.setSerialNumber(3333);
         log.info("response heartbeat message {}", ctx.channel());
-        ctx.channel().writeAndFlush(heartbeatMessage);
     }
 
 
@@ -190,27 +191,55 @@ public class NatServerChannelHandler extends SimpleChannelInboundHandler<ProxyMe
 
     }
 
+//    @Override
+//
+//    public void handlerRemoved(ChannelHandlerContext ctx) throws Exception {
+//
+//        // 获取到inactive对应的port
+//        int port = ctx.channel().attr(Constants.SERVER_USER_PORT).get();
+//        ProxyServer.getInstance().closeMappingPort(port);
+//        LogUtil.i(tag,"端口："+ String.valueOf(port)+"对应的channel已经关闭");
+//
+//    }
+
+    /**
+     * 事件触发
+     *
+     * @param ctx
+     * @param evt
+     * @throws Exception
+     */
     @Override
+    public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
+        if (evt instanceof IdleStateEvent) {
 
-    public void handlerRemoved(ChannelHandlerContext ctx) throws Exception {
+            LogUtil.i(tag,"超时检测");
 
-        // 获取到inactive对应的port
-        int port = ctx.channel().attr(Constants.SERVER_USER_PORT).get();
-        ProxyServer.getInstance().closeMappingPort(port);
-        LogUtil.i(tag,"端口："+ String.valueOf(port)+"对应的channel已经关闭");
-
+            IdleStateEvent idleStateEvent = (IdleStateEvent) evt;
+            if (idleStateEvent.state() == IdleState.READER_IDLE) {
+                LogUtil.w(tag, "已经 10 秒没有收到信息！");
+                //向服务端发送消息
+            }else if (idleStateEvent.state() == IdleState.WRITER_IDLE){
+                LogUtil.w(tag, "已经 10 秒没有发出信息！");
+            }
+        }
+        super.userEventTriggered(ctx, evt);
     }
 
+    /**
+     * channel inactice时关闭对应的usermapping 端口
+     * @param ctx
+     * @throws Exception
+     */
+    @Override
+    public void channelInactive(ChannelHandlerContext ctx) throws Exception{
 
-//    @Override
-//    public void channelInactive(ChannelHandlerContext ctx) throws Exception{
-//
-    //        // 获取到inactive对应的port
-    //        int port = ctx.channel().attr(Constants.SERVER_USER_PORT).get();
-    //        ProxyServer.getInstance().closeMappingPort(port);
-    //        LogUtil.i(tag,"端口："+ String.valueOf(port)+"对应的channel已经关闭");
-//        super.channelInactive(ctx);
-//    }
+            // 获取到inactive对应的port
+            int port = ctx.channel().attr(Constants.SERVER_USER_PORT).get();
+            ProxyServer.getInstance().closeMappingPort(port);
+            LogUtil.i(tag,"端口："+ String.valueOf(port)+"对应的channel已经关闭");
+        super.channelInactive(ctx);
+    }
 
 
 

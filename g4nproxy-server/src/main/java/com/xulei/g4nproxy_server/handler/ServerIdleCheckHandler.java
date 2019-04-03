@@ -35,6 +35,7 @@ public class ServerIdleCheckHandler extends IdleStateHandler {
             logger.info("channel write timeout {}", ctx.channel());
             ProxyMessage proxyMessage = new ProxyMessage();
             proxyMessage.setType(ProxyMessage.TYPE_HEARTBEAT);
+            proxyMessage.setSerialNumber(2222);
             ctx.channel().writeAndFlush(proxyMessage);
         } else if (IdleStateEvent.FIRST_READER_IDLE_STATE_EVENT == evt) {
             logger.warn("channel read timeout {}  clone port mapping ", ctx.channel());

@@ -2,6 +2,7 @@ package com.xulei.g4nproxy_server.server;
 
 import com.xulei.g4nproxy_protocol.protocol.Constants;
 import com.xulei.g4nproxy_protocol.protocol.ProxyMessage;
+import com.xulei.g4nproxy_server.util.LogUtil;
 
 import java.util.Iterator;
 import java.util.Map;
@@ -19,6 +20,9 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class ProxyChannelManager {
+
+
+    private static final String tag = "ProxyChannelManager";
 
     // clientId 和 channel 的绑定
     private static Map<String, Channel> cmdChannels = new ConcurrentHashMap<String, Channel>();
@@ -53,10 +57,15 @@ public class ProxyChannelManager {
                 }
             }
             oldChannel.close();
-            log.info("close old channel,the channel replaced by new cannel");
-        }else{
+            log.info("close old channel,the channel replaced by new channel");
+        }else {
             // 获取一个新的可用端口号
+            LogUtil.i(tag,"服务器生成一个新的userMapping端口");
             nextPort = AvailablePortManager.getInstance().poll(clientKey);
+
+        }
+
+            //开始绑定端口
             boolean bindSuccess = false;
 
             //userMapServerBootStrap 绑定端口并开启
@@ -73,7 +82,6 @@ public class ProxyChannelManager {
                 throw new IllegalStateException("no availeable port resource !!!");
             }
 
-        }
 
         // 客户端（proxy-client）相对较少，这里同步的比较重
         // 保证服务器对外端口与客户端到服务器的连接关系在临界情况时调用removeChannel(Channel channel)时不出问题
