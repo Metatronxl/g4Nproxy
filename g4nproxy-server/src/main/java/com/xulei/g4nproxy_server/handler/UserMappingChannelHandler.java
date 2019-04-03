@@ -36,6 +36,9 @@ public class UserMappingChannelHandler extends SimpleChannelInboundHandler<ByteB
     /**
      * 在userMapping port检测到连接后，建立dataChannel和userChannel之间的绑定
      *
+     *
+     * 只有在读取到数据后（也就是在channelRead0中）才能互相绑定channel，不然绑定的可能是错误的channel
+     *
      * @param ctx
      * @param msg
      * @throws Exception
@@ -58,8 +61,8 @@ public class UserMappingChannelHandler extends SimpleChannelInboundHandler<ByteB
             ctx.channel().close();
         }else{
             // channel互相绑定
-            natDataChannel.attr(Constants.NEXT_CHANNEL).set(userMappingChannel);
-            userMappingChannel.attr(Constants.NEXT_CHANNEL).set(natDataChannel);
+            natDataChannel.attr(Constants.SERVER_NEXT_CHANNEL).set(userMappingChannel);
+            userMappingChannel.attr(Constants.SERVER_NEXT_CHANNEL).set(natDataChannel);
 
 
             byte[] bytes = new byte[msg.readableBytes()];
@@ -92,7 +95,7 @@ public class UserMappingChannelHandler extends SimpleChannelInboundHandler<ByteB
 
         //获取数据channel
 
-        Channel natDataChannel = ctx.channel().attr(Constants.NEXT_CHANNEL).get();
+        Channel natDataChannel = ctx.channel().attr(Constants.SERVER_NEXT_CHANNEL).get();
         natDataChannel.writeAndFlush(msg);
 //        ctx.channel().writeAndFlush(msg);
 
@@ -105,7 +108,7 @@ public class UserMappingChannelHandler extends SimpleChannelInboundHandler<ByteB
      */
     private void handleMessageRtn(ChannelHandlerContext ctx, ProxyMessage msg){
         LogUtil.w(tag,"处理接受数据的逻辑"+msg.toString());
-        Channel userMappingChannel = ctx.channel().attr(Constants.NEXT_CHANNEL).get();
+        Channel userMappingChannel = ctx.channel().attr(Constants.SERVER_NEXT_CHANNEL).get();
         userMappingChannel.writeAndFlush(msg);
     }
 
@@ -157,10 +160,10 @@ public class UserMappingChannelHandler extends SimpleChannelInboundHandler<ByteB
         }else {
             String userId = ProxyChannelManager.getUserChannelUserId(userMappingChannel);
             ProxyChannelManager.removeUserChannelFromCmdChannel(userMappingChannel,userId);
-            Channel natDataChannel = userMappingChannel.attr(Constants.NEXT_CHANNEL).get();
+            Channel natDataChannel = userMappingChannel.attr(Constants.SERVER_NEXT_CHANNEL).get();
             // 清除DataChannel
             if (natDataChannel != null && natDataChannel.isActive()) {
-                natDataChannel.attr(Constants.NEXT_CHANNEL).set(null);
+                natDataChannel.attr(Constants.SERVER_NEXT_CHANNEL).set(null);
                 natDataChannel.attr(Constants.CLIENT_KEY).set(null);
                 natDataChannel.attr(Constants.USER_ID).set(null);
 
@@ -190,7 +193,7 @@ public class UserMappingChannelHandler extends SimpleChannelInboundHandler<ByteB
             // 该端口还没有代理客户端
             ctx.channel().close();
         } else {
-            Channel proxyChannel = userChannel.attr(Constants.NEXT_CHANNEL).get();
+            Channel proxyChannel = userChannel.attr(Constants.SERVER_NEXT_CHANNEL).get();
             if (proxyChannel != null) {
                 proxyChannel.config().setOption(ChannelOption.AUTO_READ, userChannel.isWritable());
             }

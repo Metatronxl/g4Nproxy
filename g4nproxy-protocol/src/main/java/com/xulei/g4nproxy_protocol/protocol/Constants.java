@@ -5,7 +5,7 @@ import io.netty.util.AttributeKey;
 
 public interface Constants {
 
-    AttributeKey<Channel> NEXT_CHANNEL = AttributeKey.newInstance("nxt_channel");
+    AttributeKey<Channel> SERVER_NEXT_CHANNEL = AttributeKey.newInstance("server_nxt_channel");
 
     AttributeKey<String> USER_ID = AttributeKey.newInstance("user_id");
 

@@ -69,8 +69,9 @@ public class NatServerChannelHandler extends SimpleChannelInboundHandler<ProxyMe
      */
     private void handleMessageRtn(ChannelHandlerContext ctx,ProxyMessage proxyMessage){
         //获取到对应的userChannel
-        Channel userMappingChannel  = ctx.channel().attr(Constants.NEXT_CHANNEL).get();
+        Channel userMappingChannel  = ctx.channel().attr(Constants.SERVER_NEXT_CHANNEL).get();
         String userId =  userMappingChannel.id().asShortText();
+        LogUtil.i("TEST",userId);
 
         if (userMappingChannel!=null){
             LogUtil.i(tag,"处理4g代理服务器返回的数据");
@@ -156,7 +157,7 @@ public class NatServerChannelHandler extends SimpleChannelInboundHandler<ProxyMe
         if (userChannel != null) {
             // 数据发送完成后再关闭连接，解决http1.0数据传输问题
             userChannel.writeAndFlush(Unpooled.EMPTY_BUFFER).addListener(ChannelFutureListener.CLOSE);
-            ctx.channel().attr(Constants.NEXT_CHANNEL).set(null);
+            ctx.channel().attr(Constants.SERVER_NEXT_CHANNEL).set(null);
             ctx.channel().attr(Constants.CLIENT_KEY).set(null);
             ctx.channel().attr(Constants.USER_ID).set(null);
 
@@ -176,7 +177,7 @@ public class NatServerChannelHandler extends SimpleChannelInboundHandler<ProxyMe
 
         LogUtil.i(tag,"发送请求数据前往4g服务器");
         //获取到对应的userChannel
-        Channel userMappingChannel  = ctx.channel().attr(Constants.NEXT_CHANNEL).get();
+        Channel userMappingChannel  = ctx.channel().attr(Constants.SERVER_NEXT_CHANNEL).get();
         if (userMappingChannel != null){
             ByteBuf buf = ctx.alloc().buffer(message.getData().length);
             buf.writeBytes(message.getData());
@@ -187,16 +188,6 @@ public class NatServerChannelHandler extends SimpleChannelInboundHandler<ProxyMe
 
     }
 
-    /**
-     * 处理连接请求消息
-     * TODO 废弃方法
-     * @param ctx
-     * @param proxyMessage
-     */
-    private void handleConnectMessage(ChannelHandlerContext ctx, ProxyMessage proxyMessage){
 
-        LogUtil.i(tag,"handle connectMessage");
-        LogUtil.i(tag,"MSG: "+ proxyMessage.toString());
-    }
 
 }
