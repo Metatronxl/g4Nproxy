@@ -176,8 +176,26 @@ public class UserMappingChannelHandler extends SimpleChannelInboundHandler<ByteB
 //
 //        }
 //
+        Channel userMappingChannel = ctx.channel();
+        InetSocketAddress sa  = (InetSocketAddress) userMappingChannel.localAddress();
+        Channel cmdChannel = ProxyChannelManager.getCmdChannel(sa.getPort());
+        LogUtil.w(tag,"userMappingChannel lose connection, port :"+String.valueOf(sa.getPort()));
+        // 4g代理服务器与server之间的管道，一般不会断开
+        if (cmdChannel == null){
+            ctx.channel().close();
+        }else{
+            String userId = ProxyChannelManager.getUserChannelUserId(userMappingChannel);
+            ProxyChannelManager.removeUserChannelFromCmdChannel(userMappingChannel,userId);
+            // 检测通道是否仍然存活
+            if (cmdChannel.isActive()){
+                // 发送请求断开数据包
+                ProxyMessage proxyMessage = new ProxyMessage();
+                proxyMessage.setType(ProxyMessage.TYPE_DISCONNECT);
+                proxyMessage.setUri(userId);
+                cmdChannel.writeAndFlush(proxyMessage);
+            }
 
-
+        }
 
         super.channelInactive(ctx);
 
