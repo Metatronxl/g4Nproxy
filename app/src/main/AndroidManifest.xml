@@ -16,6 +16,10 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <service android:name=".HttpProxyService"/>
     </application>
+
+
+    <uses-permission android:name="android.permission.INTERNET"></uses-permission>
 
 </manifest>

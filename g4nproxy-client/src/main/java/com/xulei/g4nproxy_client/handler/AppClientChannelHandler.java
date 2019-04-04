@@ -146,21 +146,24 @@ public class AppClientChannelHandler extends SimpleChannelInboundHandler<ProxyMe
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
 
-        // 控制连接
-        if (proxyClient.getClientChannelManager().getCmdChannel() == ctx.channel()) {
-            proxyClient.getClientChannelManager().setCmdChannel(null);
-            proxyClient.getClientChannelManager().clearRealServerChannels();
-            channelStatusListener.channelInactive(ctx);
-        } else {
-            // 数据传输连接
-            Channel realServerChannel = ctx.channel().attr(Constants.NEXT_CHANNEL).get();
-            if (realServerChannel != null && realServerChannel.isActive()) {
-                realServerChannel.close();
-            }
-        }
+//        // 控制连接
+//        if (proxyClient.getClientChannelManager().getCmdChannel() == ctx.channel()) {
+//            proxyClient.getClientChannelManager().setCmdChannel(null);
+//            proxyClient.getClientChannelManager().clearRealServerChannels();
+//            channelStatusListener.channelInactive(ctx);
+//        } else {
+//            // 数据传输连接
+//            Channel realServerChannel = ctx.channel().attr(Constants.NEXT_CHANNEL).get();
+//            if (realServerChannel != null && realServerChannel.isActive()) {
+//                realServerChannel.close();
+//            }
+//        }
+//
+//        proxyClient.getClientChannelManager().removeProxyChannel(ctx.channel());
 
-        proxyClient.getClientChannelManager().removeProxyChannel(ctx.channel());
+        LogUtil.i(tag,"channel 断开连接");
         super.channelInactive(ctx);
+
     }
 
 

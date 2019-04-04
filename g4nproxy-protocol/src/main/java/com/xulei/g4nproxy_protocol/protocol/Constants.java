@@ -19,7 +19,7 @@ public interface Constants {
 //    String g4ProxyServerHost_2 = "39.106.55.139";
 
     // 请求服务器IP地址
-    String g4nproxyServerHost = "127.0.0.1";
+    String g4nproxyServerHost = "98.142.143.217";
     // 请求服务器port端口
     int g4nproxyServerPort = 30000;
 
