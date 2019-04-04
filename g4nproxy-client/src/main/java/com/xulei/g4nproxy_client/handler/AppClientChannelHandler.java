@@ -51,9 +51,9 @@ public class AppClientChannelHandler extends SimpleChannelInboundHandler<ProxyMe
             case ProxyMessage.P_TYPE_TRANSFER:
                 handleTransferMessage(ctx, msg);
                 break;
-//            case ProxyMessage.TYPE_DISCONNECT:
-//                handleDisconnectMessage(ctx,msg);
-//                break;
+            case ProxyMessage.TYPE_DISCONNECT:
+                handleDisconnectMessage(ctx,msg);
+                break;
         }
 
 
@@ -110,17 +110,18 @@ public class AppClientChannelHandler extends SimpleChannelInboundHandler<ProxyMe
      * @param ctx
      * @param msg
      */
-//    private void handleDisconnectMessage(ChannelHandlerContext ctx,ProxyMessage msg){
-//        Channel littleProxyServerChannel = ctx.channel().attr(Constants.NEXT_CHANNEL).get();
-//        LogUtil.i(tag, "handleDisconnectMessage, :" + littleProxyServerChannel);
-//        if (littleProxyServerChannel != null) {
-//            ctx.channel().attr(Constants.NEXT_CHANNEL).remove();
-//            // 将channel 返回代理池中
+    private void handleDisconnectMessage(ChannelHandlerContext ctx,ProxyMessage msg){
+        Channel littleProxyServerChannel = ctx.channel().attr(Constants.NEXT_CHANNEL).get();
+        LogUtil.i(tag, "handleDisconnectMessage, :" + littleProxyServerChannel);
+        if (littleProxyServerChannel != null) {
+
+//            ctx.channel().attr(Constants.NEXT_CHANNEL).set(null);
+            // 将channel 返回代理池中
 //            proxyClient.getClientChannelManager().returnProxyChannel(ctx.channel());
-//            // 清空channel中的剩余消息
-//            littleProxyServerChannel.writeAndFlush(Unpooled.EMPTY_BUFFER).addListener(ChannelFutureListener.CLOSE);
-//        }
-//    }
+            // 清空channel中的剩余消息
+            littleProxyServerChannel.writeAndFlush(Unpooled.EMPTY_BUFFER);
+        }
+    }
 
     /**
      * 事件触发
