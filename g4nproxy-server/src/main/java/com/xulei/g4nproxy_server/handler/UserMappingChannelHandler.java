@@ -51,7 +51,9 @@ public class UserMappingChannelHandler extends SimpleChannelInboundHandler<ByteB
         // 获取代理服务器（4g）所在的channel
         Channel userMappingChannel =  ctx.channel();
         InetSocketAddress sa = (InetSocketAddress) userMappingChannel.localAddress();
-        Channel natDataChannel = ProxyChannelManager.getCmdChannel(sa.getPort());
+//        Channel natDataChannel = ProxyChannelManager.getCmdChannel(sa.getPort());
+
+        Channel natDataChannel = ProxyChannelManager.getNatServerChannel(Constants.NATSERVER_CHANNEL);
 
         //通道未建立时拒绝连接
         if(natDataChannel == null){

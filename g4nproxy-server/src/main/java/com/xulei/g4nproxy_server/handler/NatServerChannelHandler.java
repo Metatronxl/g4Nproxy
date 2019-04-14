@@ -35,10 +35,10 @@ public class NatServerChannelHandler extends SimpleChannelInboundHandler<ProxyMe
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception{
 
-//        //将系统端口与channel进行连接
-//        LogUtil.i(tag,"将内网穿透端口添加进cmdChannels");
-//        ProxyChannelManager.setCmdChannels(Constants.g4nproxyServerPort,ctx.channel());
-        super.channelActive(ctx);
+   //
+    ProxyChannelManager.setNatServerChannel(Constants.NATSERVER_CHANNEL,ctx.channel());
+
+    super.channelActive(ctx);
     }
 
     @Override

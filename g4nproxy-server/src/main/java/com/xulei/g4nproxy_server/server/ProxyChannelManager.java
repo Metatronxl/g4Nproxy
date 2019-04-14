@@ -37,6 +37,23 @@ public class ProxyChannelManager {
     private static final AttributeKey<Map<String, Channel>> USER_CHANNELS = AttributeKey.newInstance("user_channels");
 
 
+    // natserver channel
+    private static final Map<String,Channel> natServerChannel = new ConcurrentHashMap<>();
+
+    /**
+     * 获取natserverChannel
+     * @param key
+     * @param channel
+     */
+    public static void setNatServerChannel(String key,Channel channel){
+        natServerChannel.put(key,channel);
+    }
+
+    public static Channel getNatServerChannel(String key){
+        return natServerChannel.get(key);
+    }
+
+
 
 
     public static void addCmdChannel(String clientKey, Channel channel){
