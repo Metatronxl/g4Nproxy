@@ -40,6 +40,9 @@ public class ProxyChannelManager {
     // natserver channel
     private static final Map<String,Channel> natServerChannel = new ConcurrentHashMap<>();
 
+    // userMappinf channel
+    private static final Map<Long,Channel> userMappingChannelMap = new ConcurrentHashMap<>();
+
     /**
      * 获取natserverChannel
      * @param key
@@ -52,6 +55,19 @@ public class ProxyChannelManager {
     public static Channel getNatServerChannel(String key){
         return natServerChannel.get(key);
     }
+
+    /**
+     * 根据serialNumber获取usermappingChannel
+     * @param serialNumber
+     * @param channel
+     */
+    public static void setUserMappingChannelMap(long serialNumber,Channel channel){
+        userMappingChannelMap.put(serialNumber,channel);
+    }
+    public static Channel getUsermappingChannel(long serialNumber){
+        return userMappingChannelMap.get(serialNumber);
+    }
+
 
 
 
