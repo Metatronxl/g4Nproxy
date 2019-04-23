@@ -3,6 +3,7 @@ package com.xulei.g4nproxy_client;
 
 import com.xulei.g4nproxy_client.handler.AppClientChannelHandler;
 import com.xulei.g4nproxy_client.handler.LittleProxyServerChannelHandler;
+import com.xulei.g4nproxy_client.kidHttpProxy.ProxySerever;
 import com.xulei.g4nproxy_client.util.Launcher;
 import com.xulei.g4nproxy_client.util.LogUtil;
 import com.xulei.g4nproxy_protocol.ClientChannelManager;
@@ -20,7 +21,6 @@ import io.netty.channel.ChannelInitializer;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
-import io.netty.handler.timeout.IdleStateHandler;
 import lombok.extern.slf4j.Slf4j;
 
 import static com.xulei.g4nproxy_client.Constants.APP_CLIENT_HANDLER;
@@ -91,10 +91,20 @@ public class ProxyClient implements ChannelStatusListener {
      * @param serverPort 公网服务端口
      * @param clientID   客户端标记，同一个客户端标记在服务器端会映射为同一个端口
      */
-    public static ProxyClient start(String serverHost, int serverPort, final String clientID) {
+    public static ProxyClient start(String serverHost, int serverPort, final String clientID) throws InterruptedException {
         ProxyClient proxyClient = new ProxyClient(serverHost, serverPort, clientID);
         //启动littleProxy服务器
-        Launcher.startHttpProxyService(Constants.littleProxyPort);
+//        Launcher.startHttpProxyService(Constants.littleProxyPort);
+
+        new Thread(() -> {
+            try {
+                ProxySerever.start();
+            } catch (InterruptedException e) {
+                LogUtil.e(tag,e.getMessage());
+            }
+
+        }).start();
+
         proxyClient.startInernal();
         return proxyClient;
     }

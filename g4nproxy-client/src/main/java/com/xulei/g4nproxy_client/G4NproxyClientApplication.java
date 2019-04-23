@@ -15,7 +15,7 @@ class G4NproxyClientApplication {
      */
     private static final String clientID  = "testClientKey";
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws InterruptedException {
         ProxyClient.start(Constants.g4nproxyServerHost,Constants.g4nproxyServerPort,clientID);
 
     }
