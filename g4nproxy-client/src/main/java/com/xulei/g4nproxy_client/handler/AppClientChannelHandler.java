@@ -32,8 +32,6 @@ public class AppClientChannelHandler extends SimpleChannelInboundHandler<ProxyMe
 
     private ChannelStatusListener channelStatusListener;
 
-    private static long sleepTimeMill = 1000;
-
     public AppClientChannelHandler(ChannelStatusListener channelStatusListener, ProxyClient proxyClient){
         this.proxyClient = proxyClient;
         this.channelStatusListener = channelStatusListener;
@@ -97,6 +95,7 @@ public class AppClientChannelHandler extends SimpleChannelInboundHandler<ProxyMe
                     ProxyMessage natMessage = new ProxyMessage();
                     natMessage.setType(ProxyMessage.TYPE_DISCONNECT);
                     natMessage.setSerialNumber(message.getSerialNumber());
+                    natMessage.setUri(message.getUri());
                     ctx.channel().writeAndFlush(natMessage);
                 }
 

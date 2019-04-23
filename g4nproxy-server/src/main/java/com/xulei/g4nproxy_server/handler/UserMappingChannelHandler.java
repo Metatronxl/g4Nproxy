@@ -48,9 +48,7 @@ public class UserMappingChannelHandler extends SimpleChannelInboundHandler<ByteB
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, ByteBuf msg) throws Exception {
 
-        LogUtil.i(tag, "receive data from user end point");
-
-//        LogUtil.i("TEST",ByteArrayUtil.msgToString(msg));
+        log.info(tag, "receive data from user end point");
 
         // 获取代理服务器（4g）所在的channel
         Channel userMappingChannel = ctx.channel();
@@ -66,10 +64,6 @@ public class UserMappingChannelHandler extends SimpleChannelInboundHandler<ByteB
             LogUtil.w(tag, "data mapping channel is empty, reject connection");
             ctx.channel().close();
         } else {
-            // channel互相绑定
-            natDataChannel.attr(Constants.SERVER_NEXT_CHANNEL).set(userMappingChannel);
-            userMappingChannel.attr(Constants.SERVER_NEXT_CHANNEL).set(natDataChannel);
-
 
             byte[] bytes = new byte[msg.readableBytes()];
             msg.readBytes(bytes);

@@ -74,6 +74,7 @@ public class NatServerChannelHandler extends SimpleChannelInboundHandler<ProxyMe
             ProxyMessage natMessage = new ProxyMessage();
             natMessage.setType(ProxyMessage.TYPE_DISCONNECT);
             natMessage.setSerialNumber(seq);
+            natMessage.setUri(proxyMessage.getUri());
             natChannel.writeAndFlush(natMessage);
             return;
         }
