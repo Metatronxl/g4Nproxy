@@ -48,3 +48,23 @@ virjar
 
 
 
+##捐赠
+
+如果你觉得作者辛苦了，可以考虑请作者喝一杯卡布奇洛☕️
+
+
+
+![donate code](https://ws3.sinaimg.cn/large/006tNc79ly1g2d0fsgj6aj31660u0dle.jpg)
+
+
+
+
+
+
+
+
+
+
+
+
+
