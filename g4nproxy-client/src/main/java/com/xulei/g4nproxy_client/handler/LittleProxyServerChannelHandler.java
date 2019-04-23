@@ -43,6 +43,7 @@ public class LittleProxyServerChannelHandler extends SimpleChannelInboundHandler
             proxyMessage.setType(ProxyMessage.P_TYPE_TANSFER_RTN);  //定义数据类型
             proxyMessage.setUri("TEST_USER_ID");  // userId
             proxyMessage.setData(bytes); // 具体的内容
+            proxyMessage.setSerialNumber(littleProxyChannel.attr(com.xulei.g4nproxy_protocol.protocol.Constants.SERIAL_NUM).get());
             natDataChannel.writeAndFlush(proxyMessage);
             LogUtil.i(tag, "http响应数据写回, littleProxyChannel:" + littleProxyChannel + "  natDataChannel " + natDataChannel);
         }

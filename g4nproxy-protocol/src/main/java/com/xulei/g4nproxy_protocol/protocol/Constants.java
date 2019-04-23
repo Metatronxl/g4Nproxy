@@ -11,15 +11,19 @@ public interface Constants {
     AttributeKey<Integer> SERVER_USER_PORT = AttributeKey.newInstance("server_user_port");
 
 
-    AttributeKey<String> USER_ID = AttributeKey.newInstance("user_id");
+    AttributeKey<String> USER_ID = AttributeKey.newInstance("user_id_protocol");
 
     AttributeKey<String> CLIENT_KEY = AttributeKey.newInstance("client_key");
+
+    // 消息的序列号
+    AttributeKey<Long> SERIAL_NUM = AttributeKey.newInstance("user_mapping_seq");
 
 //    String g4ProxyServerHost_1 = "114.116.98.169";
 //    String g4ProxyServerHost_2 = "39.106.55.139";
 
     // 请求服务器IP地址
-    String g4nproxyServerHost = "98.142.143.217";
+//    98.142.143.217
+    String g4nproxyServerHost = "127.0.0.1";
     // 请求服务器port端口
     int g4nproxyServerPort = 30000;
 
@@ -53,5 +57,9 @@ public interface Constants {
      int INITIAL_BYTES_TO_STRIP = 0;
 
      int LENGTH_ADJUSTMENT = 0;
+
+     //natserverChannel
+    String NATSERVER_CHANNEL = "natserver_Channel";
+
 
 }

@@ -40,4 +40,5 @@ public interface Constants {
     AttributeKey<Channel> NEXT_CHANNEL = AttributeKey.newInstance("nxt_channel");
 
     AttributeKey<String> USER_ID = AttributeKey.newInstance("user_id");
+
 }

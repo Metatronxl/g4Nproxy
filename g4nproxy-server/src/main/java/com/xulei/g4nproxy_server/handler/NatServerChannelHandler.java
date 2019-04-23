@@ -12,6 +12,7 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelOption;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.timeout.IdleState;
 import io.netty.handler.timeout.IdleStateEvent;
@@ -35,10 +36,10 @@ public class NatServerChannelHandler extends SimpleChannelInboundHandler<ProxyMe
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception{
 
-//        //将系统端口与channel进行连接
-//        LogUtil.i(tag,"将内网穿透端口添加进cmdChannels");
-//        ProxyChannelManager.setCmdChannels(Constants.g4nproxyServerPort,ctx.channel());
-        super.channelActive(ctx);
+   //
+//    ProxyChannelManager.setNatServerChannel(Constants.NATSERVER_CHANNEL,ctx.channel());
+
+    super.channelActive(ctx);
     }
 
     @Override
@@ -60,9 +61,30 @@ public class NatServerChannelHandler extends SimpleChannelInboundHandler<ProxyMe
             case ProxyMessage.P_TYPE_TRANSFER:
                 handleTransferMessage(ctx,msg);
                 break;
+            case ProxyMessage.TYPE_CONNECT_READY:
+                handleTypeConnectReady(ctx,msg);
+                break;
 
 
         }
+    }
+
+    private void handleTypeConnectReady(ChannelHandlerContext ctx, ProxyMessage proxyMessage){
+        Channel natChannel = ctx.channel();
+
+        long seq = proxyMessage.getSerialNumber();
+
+        Channel userMappingChannel = ProxyChannelManager.getUsermappingChannel(seq);
+        if (userMappingChannel == null) {
+            log.warn("can not find userMapping channel for request :{} client:{} when connection ready", seq);
+            ProxyMessage natMessage = new ProxyMessage();
+            natMessage.setType(ProxyMessage.TYPE_DISCONNECT);
+            natMessage.setSerialNumber(seq);
+            natChannel.writeAndFlush(natMessage);
+            return;
+        }
+        //开始接收代理业务的数据请求
+        userMappingChannel.config().setOption(ChannelOption.AUTO_READ, true);
     }
 
     /**
@@ -72,8 +94,8 @@ public class NatServerChannelHandler extends SimpleChannelInboundHandler<ProxyMe
      */
     private void handleMessageRtn(ChannelHandlerContext ctx,ProxyMessage proxyMessage){
         //获取到对应的userChannel
-        Channel userMappingChannel  = ctx.channel().attr(Constants.SERVER_NEXT_CHANNEL).get();
-
+        long seq = proxyMessage.getSerialNumber();
+        Channel userMappingChannel = ProxyChannelManager.getUsermappingChannel(seq);
         if (userMappingChannel!=null){
             LogUtil.i(tag,"处理4g代理服务器返回的数据");
             ByteBuf buf = ctx.alloc().buffer(proxyMessage.getData().length);
@@ -116,14 +138,6 @@ public class NatServerChannelHandler extends SimpleChannelInboundHandler<ProxyMe
 
 
         byte[] bytes = "建立连接成功".getBytes();
-        //构建数据包
-        ProxyMessage responseMsg = new ProxyMessage();
-        responseMsg.setType(ProxyMessage.C_TYPE_AUTH);
-        responseMsg.setData(bytes);
-
-
-        //发送认证消息给4g代理服务器
-        ctx.writeAndFlush(responseMsg);
 
 
     }

@@ -37,6 +37,23 @@ public class ProxyChannelManager {
     private static final AttributeKey<Map<String, Channel>> USER_CHANNELS = AttributeKey.newInstance("user_channels");
 
 
+    // userMapping channel
+    private static final Map<Long,Channel> userMappingChannelMap = new ConcurrentHashMap<>();
+
+    /**
+     * 根据serialNumber获取usermappingChannel
+     * @param serialNumber
+     * @param channel
+     */
+    public static void setUserMappingChannelMap(long serialNumber,Channel channel){
+        userMappingChannelMap.put(serialNumber,channel);
+    }
+    public static Channel getUsermappingChannel(long serialNumber){
+        return userMappingChannelMap.get(serialNumber);
+    }
+
+
+
 
 
     public static void addCmdChannel(String clientKey, Channel channel){
@@ -48,14 +65,14 @@ public class ProxyChannelManager {
             log.warn("exist channel for key {}, {}", clientKey, channel);
             nextPort = oldChannel.attr(CHANNEL_PORT).get();
             //TODO 需要优化userChannels
-            Map<String, Channel> userChannels = oldChannel.attr(USER_CHANNELS).get();
-            for (String s : userChannels.keySet()) {
-                Channel userChannel = userChannels.get(s);
-                if (userChannel.isActive()) {
-                    userChannel.close();
-                    log.info("disconnect user channel {}", userChannel);
-                }
-            }
+//            Map<String, Channel> userChannels = oldChannel.attr(USER_CHANNELS).get();
+//            for (String s : userChannels.keySet()) {
+//                Channel userChannel = userChannels.get(s);
+//                if (userChannel.isActive()) {
+//                    userChannel.close();
+//                    log.info("disconnect user channel {}", userChannel);
+//                }
+//            }
             oldChannel.close();
             log.info("close old channel,the channel replaced by new channel");
         }else {

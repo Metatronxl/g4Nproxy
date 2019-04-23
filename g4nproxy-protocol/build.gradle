@@ -3,8 +3,8 @@ apply plugin: 'java-library'
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     // https://mvnrepository.com/artifact/io.netty/netty-all
-    implementation 'io.netty:netty-codec:4.0.44.Final'
-    implementation 'io.netty:netty-handler:4.0.44.Final'
+    // https://mvnrepository.com/artifact/io.netty/netty-all
+    compile group: 'io.netty', name: 'netty-all', version: '4.1.30.Final'
 }
 
 sourceCompatibility = "1.7"

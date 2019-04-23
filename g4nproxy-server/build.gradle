@@ -22,8 +22,11 @@ dependencies {
     implementation project(':g4nproxy-protocol')
     compileOnly 'org.projectlombok:lombok'
     implementation 'com.google.guava:guava:23.0'
-    implementation 'io.netty:netty-codec:4.0.44.Final'
-    implementation 'io.netty:netty-handler:4.0.44.Final'
+    // https://mvnrepository.com/artifact/io.netty/netty-all
+    compile group: 'io.netty', name: 'netty-all', version: '4.1.30.Final'
+
+
+
     // 引入g4nproxy-protocol的包
     implementation project(':g4nproxy-protocol')
     implementation 'org.apache.commons:commons-lang3:3.7'
