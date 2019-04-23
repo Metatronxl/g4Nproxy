@@ -11,12 +11,14 @@ import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.util.AttributeKey;
+import jdk.nashorn.internal.objects.annotations.Setter;
 
 /**
  * 代理客户端与后端真实服务器连接管理
  * @author lei.X
  * @date 2019/3/18 4:06 PM
  */
+
 public class ClientChannelManager {
 
     private final static String tag = "ClientChannelManager";
@@ -27,6 +29,7 @@ public class ClientChannelManager {
     private final int MAX_POOL_SIZE = 100;
 
     private Map<String,Channel> littleProxyServerChannels = new ConcurrentHashMap<>();
+
 
     private ConcurrentLinkedQueue<Channel> proxyChannelPool = new ConcurrentLinkedQueue<>();
 
@@ -46,6 +49,8 @@ public class ClientChannelManager {
     public ClientChannelManager(String serverHost) {
         this.serverHost = serverHost;
     }
+
+
 
     /**
      * 将channel返回代理池中

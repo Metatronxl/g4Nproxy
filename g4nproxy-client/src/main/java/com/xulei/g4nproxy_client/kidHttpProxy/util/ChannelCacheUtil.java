@@ -2,7 +2,6 @@ package com.xulei.g4nproxy_client.kidHttpProxy.util;
 
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
-import com.xulei.g4nproxy_client.kidHttpProxy.handler.ProxyServerHandler;
 
 import java.util.concurrent.TimeUnit;
 
@@ -13,7 +12,7 @@ import java.util.concurrent.TimeUnit;
 public class ChannelCacheUtil {
 
     //创建缓存
-    private static final LoadingCache<String, ProxyServerHandler.ChannelCache> cache = Caffeine.newBuilder()
+    private static final LoadingCache<String, ChannelCache> cache = Caffeine.newBuilder()
             .initialCapacity(1024)
             //不限制缓存大小
 //			.maximumSize(10240)
@@ -26,14 +25,14 @@ public class ChannelCacheUtil {
     /**
      * 获取数据
      */
-    public static ProxyServerHandler.ChannelCache get(String channelId) {
+    public static ChannelCache get(String channelId) {
         return cache.getIfPresent(channelId);
     }
 
     /**
      * 存入数据
      */
-    public static void put(String channelId, ProxyServerHandler.ChannelCache channelCache) {
+    public static void put(String channelId, ChannelCache channelCache) {
         cache.put(channelId, channelCache);
     }
 

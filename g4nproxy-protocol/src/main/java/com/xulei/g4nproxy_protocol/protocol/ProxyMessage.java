@@ -41,6 +41,10 @@ public class ProxyMessage {
      * 代理数据传输返回
      */
     public static final byte P_TYPE_TANSFER_RTN = 0x08;
+    /**
+     * 连接准备完成
+     */
+    public static final byte TYPE_CONNECT_READY = 0x09;
 
     /**
      * 用户与代理服务器以及代理客户端与真实服务器连接是否可写状态同步

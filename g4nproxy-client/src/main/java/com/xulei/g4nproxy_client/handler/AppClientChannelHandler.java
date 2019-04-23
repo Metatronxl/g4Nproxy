@@ -10,12 +10,15 @@ import com.xulei.g4nproxy_protocol.protocol.ProxyMessage;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.timeout.IdleState;
 import io.netty.handler.timeout.IdleStateEvent;
 import lombok.extern.slf4j.Slf4j;
+
+import static com.xulei.g4nproxy_client.Constants.manageChannelMap;
 
 /**
  * @author lei.X
@@ -31,6 +34,8 @@ public class AppClientChannelHandler extends SimpleChannelInboundHandler<ProxyMe
 
     private ChannelStatusListener channelStatusListener;
 
+    private static long sleepTimeMill = 1000;
+
     public AppClientChannelHandler(ChannelStatusListener channelStatusListener, ProxyClient proxyClient){
         this.proxyClient = proxyClient;
         this.channelStatusListener = channelStatusListener;
@@ -45,9 +50,9 @@ public class AppClientChannelHandler extends SimpleChannelInboundHandler<ProxyMe
             case ProxyMessage.C_TYPE_AUTH:
                 handleAuthMessage(ctx,msg);
                 break;
-//            case ProxyMessage.TYPE_CONNECT:
-//                handleConnectMessages(ctx,msg);
-//                break;
+            case ProxyMessage.TYPE_CONNECT:
+                handleConnectMessages(ctx,msg);
+                break;
             case ProxyMessage.P_TYPE_TRANSFER:
                 handleTransferMessage(ctx, msg);
                 break;
@@ -73,6 +78,37 @@ public class AppClientChannelHandler extends SimpleChannelInboundHandler<ProxyMe
         super.channelActive(ctx);
     }
 
+
+    private void handleConnectMessages(ChannelHandlerContext ctx, ProxyMessage message){
+
+
+        proxyClient.join2LittleProxyBootStrap.connect("127.0.0.1",Constants.littleProxyPort).addListener(new ChannelFutureListener() {
+            @Override
+            public void operationComplete(ChannelFuture future) throws Exception {
+                if (future.isSuccess()){
+                    LogUtil.i(tag,"连接littleProxy服务器成功,端口："+Constants.littleProxyPort);
+                    future.channel().attr(Constants.NEXT_CHANNEL).set(ctx.channel());
+                    //注册channel
+                    proxyClient.getHttpProxyConnectionManager().register(message.getSerialNumber(), future.channel());
+                    // 发送连接littleProxy成功的通知
+                    ProxyMessage proxyMessage = new ProxyMessage();
+                    proxyMessage.setType(ProxyMessage.TYPE_CONNECT_READY);
+                    proxyMessage.setSerialNumber(message.getSerialNumber());
+                    ctx.channel().writeAndFlush(proxyMessage);
+
+                }else{
+                    LogUtil.e(tag,"连接littleProxy服务器失败,端口："+Constants.littleProxyPort);
+                    log.warn("connect to LITTEL proxy failed", future.cause());
+                    ProxyMessage natMessage = new ProxyMessage();
+                    natMessage.setType(ProxyMessage.TYPE_DISCONNECT);
+                    natMessage.setSerialNumber(message.getSerialNumber());
+                    ctx.channel().writeAndFlush(natMessage);
+                }
+
+            }
+        });
+    }
+
     /**
      * 接受服务器的确定连接响应
      * @param ctx
@@ -92,8 +128,8 @@ public class AppClientChannelHandler extends SimpleChannelInboundHandler<ProxyMe
      */
     private void handleTransferMessage(ChannelHandlerContext ctx,ProxyMessage msg){
 
-
-        Channel littleProxyServerChannel = ctx.channel().attr(Constants.NEXT_CHANNEL).get();
+        long serialNum = msg.getSerialNumber();
+        Channel littleProxyServerChannel = proxyClient.getHttpProxyConnectionManager().query(serialNum);
         if (littleProxyServerChannel == null){
             LogUtil.w(tag,"littleProxy Connection lost");
             return;
@@ -176,6 +212,8 @@ public class AppClientChannelHandler extends SimpleChannelInboundHandler<ProxyMe
         // 当出现异常就关闭连接
         ctx.close();
     }
+
+
 
 
 

@@ -9,6 +9,7 @@ import com.xulei.g4nproxy_client.kidHttpProxy.util.ChannelCache;
 import com.xulei.g4nproxy_client.kidHttpProxy.util.ChannelCacheUtil;
 import com.xulei.g4nproxy_client.kidHttpProxy.util.ProxyUtil;
 import com.xulei.g4nproxy_client.util.LogUtil;
+import com.xulei.g4nproxy_protocol.protocol.ProxyMessage;
 
 import java.net.InetSocketAddress;
 
@@ -17,7 +18,7 @@ import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelInboundHandlerAdapter;
+import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.DefaultFullHttpResponse;
 import io.netty.handler.codec.http.DefaultHttpResponse;
 import io.netty.handler.codec.http.FullHttpRequest;
@@ -33,7 +34,7 @@ import static com.xulei.g4nproxy_client.kidHttpProxy.KidHttpProxyConstants.NAME_
  * @date 2018/11/7
  */
 @ChannelHandler.Sharable
-public class ProxyServerHandler extends ChannelInboundHandlerAdapter{
+public class MessageProxyServerHandler extends SimpleChannelInboundHandler<ProxyMessage> {
 
     private static final String LOG_PRE = "【代理服务器handler】通道id:{}";
 
@@ -70,7 +71,7 @@ public class ProxyServerHandler extends ChannelInboundHandlerAdapter{
     }
 
     @Override
-    public void channelRead(ChannelHandlerContext ctx,Object msg) throws InterruptedException {
+    protected void channelRead0(ChannelHandlerContext ctx, ProxyMessage msg) throws Exception  {
         String channelId = ProxyUtil.getChannelId(ctx);
 
         LogUtil.i(LOG_PRE,"测试数据："+msg.toString());
@@ -79,34 +80,34 @@ public class ProxyServerHandler extends ChannelInboundHandlerAdapter{
 
             //HTTP/HTTPS : 如果是 http报文格式的,此时已经被编码解码器转为了该类,如果不是,则表示是https协议建立第一次连接后后续的请求等.
             if (msg instanceof FullHttpRequest){
-               final FullHttpRequest request = (FullHttpRequest)msg;
+                final FullHttpRequest request = (FullHttpRequest)msg;
 
-               InetSocketAddress address = ProxyUtil.getAddressByRequest(request);
+                InetSocketAddress address = ProxyUtil.getAddressByRequest(request);
 
-               //method 为CONNECT则说明为https
-               if (HttpMethod.CONNECT.equals(request.method())){
-                   LogUtil.i(LOG_PRE,",https requests，target "+channelId+" url: "+request.uri());
+                //method 为CONNECT则说明为https
+                if (HttpMethod.CONNECT.equals(request.method())){
+                    LogUtil.i(LOG_PRE,",https requests，target "+channelId+" url: "+request.uri());
 
-                   //存入缓存
-                   ChannelCacheUtil.put(channelId,new ChannelCache(address,connect(false,address,ctx,msg)));
-                   //给客户端响应成功信息 HTTP/1.1 200 Connection Established  .失败时直接退出
-                   //此处没有添加Connection Established,似乎也没问题
-                   if (!ProxyUtil.writeAndFlush(ctx, new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK), true))
-                       return;
+                    //存入缓存
+                    ChannelCacheUtil.put(channelId,new ChannelCache(address,connect(false,address,ctx,msg)));
+                    //给客户端响应成功信息 HTTP/1.1 200 Connection Established  .失败时直接退出
+                    //此处没有添加Connection Established,似乎也没问题
+                    if (!ProxyUtil.writeAndFlush(ctx, new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK), true))
+                        return;
 
-                   //此处将用于报文编码解码的处理器去除,因为后面上方的信息都是加密过的,不符合一般报文格式,我们直接转发即可
+                    //此处将用于报文编码解码的处理器去除,因为后面上方的信息都是加密过的,不符合一般报文格式,我们直接转发即可
 //                   ctx.pipeline().remove(ProxyServer.NAME_HTTP_ENCODE_HANDLER1);
 //                   ctx.pipeline().remove(ProxyServer.NAME_HTTP_DECODE_HANDLER);
-                   ctx.pipeline().remove(NAME_HTTPSERVER_CODEC);
-                   //TODO 不确定聚合是否应该去掉
+                    ctx.pipeline().remove(NAME_HTTPSERVER_CODEC);
+                    //TODO 不确定聚合是否应该去掉
 //                   ctx.pipeline().remove(ProxyServer.NAME_HTTP_AGGREGATOR_HANDLER);
 
-                   //此时 客户端已经和目标服务器 建立连接(其实是 客户端 -> 代理服务器 -> 目标服务器),
-                   //直接退出等待下一次双方连接即可.
-                   return;
-               }
+                    //此时 客户端已经和目标服务器 建立连接(其实是 客户端 -> 代理服务器 -> 目标服务器),
+                    //直接退出等待下一次双方连接即可.
+                    return;
+                }
 
-               //Http
+                //Http
                 LogUtil.i(LOG_PRE,",http request, target url:{}"+channelId+request.uri());
                 HttpHeaders headers = request.headers();
                 headers.add("Connection",headers.get("Proxy-Connection"));
@@ -161,8 +162,6 @@ public class ProxyServerHandler extends ChannelInboundHandlerAdapter{
     }
 
 
-
-
     /**
      * 和 目标主机 建立连接
      */
@@ -178,8 +177,6 @@ public class ProxyServerHandler extends ChannelInboundHandlerAdapter{
                 .connect(address)
                 .addListener(new HttpsChannelFutureListener(msg,ctx));
     }
-
-
 
 
 

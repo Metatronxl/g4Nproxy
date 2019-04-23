@@ -3,6 +3,7 @@ package com.xulei.g4nproxy_server.handler;
 import com.xulei.g4nproxy_protocol.protocol.Constants;
 import com.xulei.g4nproxy_protocol.protocol.ProxyMessage;
 import com.xulei.g4nproxy_server.server.ProxyChannelManager;
+import com.xulei.g4nproxy_server.util.ChannelUtil;
 import com.xulei.g4nproxy_server.util.IdGenerator;
 import com.xulei.g4nproxy_server.util.LogUtil;
 
@@ -13,6 +14,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelOption;
 import io.netty.channel.SimpleChannelInboundHandler;
 import lombok.extern.slf4j.Slf4j;
 
@@ -53,13 +55,11 @@ public class UserMappingChannelHandler extends SimpleChannelInboundHandler<ByteB
         // 获取代理服务器（4g）所在的channel
         Channel userMappingChannel = ctx.channel();
         InetSocketAddress sa = (InetSocketAddress) userMappingChannel.localAddress();
-//        Channel natDataChannel = ProxyChannelManager.getCmdChannel(sa.getPort());
-        // 全局只使用一个natDataChannel
-        Channel natDataChannel = ProxyChannelManager.getNatServerChannel(Constants.NATSERVER_CHANNEL);
-        //为每个请求设置序列号
-        Long serialNumber = IdGenerator.getUniqueId();
+        // 根据port获取对应的channel
+        Channel natDataChannel = ProxyChannelManager.getCmdChannel(sa.getPort());
         //绑定usermappingChannel 和 serialNumber
-        ProxyChannelManager.setUserMappingChannelMap(serialNumber,userMappingChannel);
+        long serialNumber = userMappingChannel.attr(Constants.SERIAL_NUM).get();
+
 
         //通道未建立时拒绝连接
         if (natDataChannel == null) {
@@ -123,6 +123,10 @@ public class UserMappingChannelHandler extends SimpleChannelInboundHandler<ByteB
 
         Channel userChannel = ctx.channel();
         InetSocketAddress sa = (InetSocketAddress) userChannel.localAddress();
+        //为每个请求设置序列号
+        Long serialNumber = ChannelUtil.onNewConnection(ctx.channel());
+        //绑定serialNumber 和userChannel
+        ProxyChannelManager.setUserMappingChannelMap(serialNumber,userChannel);
         //根据端口可以找到对应的channel
         Channel cmdChannel = ProxyChannelManager.getCmdChannel(sa.getPort());
         LogUtil.i(tag, "a new connect from user endpoint,local port:{}" + sa.getPort());
@@ -133,10 +137,11 @@ public class UserMappingChannelHandler extends SimpleChannelInboundHandler<ByteB
             String userId = newUserId();
             log.info("alloc new user id for conenction:{} with uid:{} with local port:{}", userChannel, userId, sa.getPort());
             // 用户连接到代理服务器时，设置用户连接不可读，等待代理后端服务器连接成功后再改变为可读状态
-//            userChannel.config().setOption(ChannelOption.AUTO_READ, false);
+            userChannel.config().setOption(ChannelOption.AUTO_READ, false);
             ProxyChannelManager.addUserChannelToCmdChannel(cmdChannel, userId, userChannel);
             ProxyMessage proxyMessage = new ProxyMessage();
             proxyMessage.setType(ProxyMessage.TYPE_CONNECT);
+            proxyMessage.setSerialNumber(serialNumber);
             proxyMessage.setUri(userId);
 
             LogUtil.i(tag, "connect to nat client ,request a data channel");

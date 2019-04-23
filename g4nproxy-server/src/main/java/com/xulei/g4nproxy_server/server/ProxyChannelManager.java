@@ -37,24 +37,8 @@ public class ProxyChannelManager {
     private static final AttributeKey<Map<String, Channel>> USER_CHANNELS = AttributeKey.newInstance("user_channels");
 
 
-    // natserver channel
-    private static final Map<String,Channel> natServerChannel = new ConcurrentHashMap<>();
-
-    // userMappinf channel
+    // userMapping channel
     private static final Map<Long,Channel> userMappingChannelMap = new ConcurrentHashMap<>();
-
-    /**
-     * 获取natserverChannel
-     * @param key
-     * @param channel
-     */
-    public static void setNatServerChannel(String key,Channel channel){
-        natServerChannel.put(key,channel);
-    }
-
-    public static Channel getNatServerChannel(String key){
-        return natServerChannel.get(key);
-    }
 
     /**
      * 根据serialNumber获取usermappingChannel
@@ -81,14 +65,14 @@ public class ProxyChannelManager {
             log.warn("exist channel for key {}, {}", clientKey, channel);
             nextPort = oldChannel.attr(CHANNEL_PORT).get();
             //TODO 需要优化userChannels
-            Map<String, Channel> userChannels = oldChannel.attr(USER_CHANNELS).get();
-            for (String s : userChannels.keySet()) {
-                Channel userChannel = userChannels.get(s);
-                if (userChannel.isActive()) {
-                    userChannel.close();
-                    log.info("disconnect user channel {}", userChannel);
-                }
-            }
+//            Map<String, Channel> userChannels = oldChannel.attr(USER_CHANNELS).get();
+//            for (String s : userChannels.keySet()) {
+//                Channel userChannel = userChannels.get(s);
+//                if (userChannel.isActive()) {
+//                    userChannel.close();
+//                    log.info("disconnect user channel {}", userChannel);
+//                }
+//            }
             oldChannel.close();
             log.info("close old channel,the channel replaced by new channel");
         }else {

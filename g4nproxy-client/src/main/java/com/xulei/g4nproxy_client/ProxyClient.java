@@ -21,6 +21,7 @@ import io.netty.channel.ChannelInitializer;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 import static com.xulei.g4nproxy_client.Constants.APP_CLIENT_HANDLER;
@@ -61,11 +62,14 @@ public class ProxyClient implements ChannelStatusListener {
 
     private ClientChannelManager clientChannelManager;
 
+    @Getter
+    private HttpProxyConnectionManager httpProxyConnectionManager = new HttpProxyConnectionManager();
+
     //手机的代理客户端
-    private Bootstrap appBootstrap;
+    public Bootstrap appBootstrap;
 
     //连接手机代理服务器
-    private Bootstrap join2LittleProxyBootStrap;
+    public Bootstrap join2LittleProxyBootStrap;
 
     private NioEventLoopGroup workerGroup;
 
@@ -139,7 +143,8 @@ public class ProxyClient implements ChannelStatusListener {
                     }
                 });
         //TODO 添加sleep时间，避免内网服务器连接失败
-        connectSelfServer();
+//        connectSelfServer();
+        connectServer();
     }
 
     /**
@@ -151,7 +156,7 @@ public class ProxyClient implements ChannelStatusListener {
             public void operationComplete(ChannelFuture future) throws Exception {
                 if (future.isSuccess()){
                     LogUtil.i(tag,"连接littleProxy服务器成功,端口："+Constants.littleProxyPort);
-                    connectServer(future.channel());
+//                    connectServer(future.channel());
 
                     //将channel给保存起来
                     manageChannelMap.put(Constants.LOCAL_SERVER_CHANNEL,future.channel());
@@ -170,7 +175,7 @@ public class ProxyClient implements ChannelStatusListener {
      * 连接请求服务器
      * param channel
      */
-    private void connectServer(final Channel join2LittleProxyBootStrapChannel){
+    private void connectServer(){
         appBootstrap.connect(serverHost,serverPort).addListener(new ChannelFutureListener() {
             @Override
             public void operationComplete(ChannelFuture future) throws Exception {
@@ -178,10 +183,10 @@ public class ProxyClient implements ChannelStatusListener {
 
 
                     //appBootstrap 与 join2LittleProxyBootStrap 建立绑定
-                    Channel appBootstrapChannel = future.channel();
-                    Channel littleProxyBootStrapChannel  = join2LittleProxyBootStrapChannel;
-                    littleProxyBootStrapChannel.attr(Constants.NEXT_CHANNEL).set(appBootstrapChannel);
-                    appBootstrapChannel.attr(Constants.NEXT_CHANNEL).set(littleProxyBootStrapChannel);
+//                    Channel appBootstrapChannel = future.channel();
+//                    Channel littleProxyBootStrapChannel  = join2LittleProxyBootStrapChannel;
+//                    littleProxyBootStrapChannel.attr(Constants.NEXT_CHANNEL).set(appBootstrapChannel);
+//                    appBootstrapChannel.attr(Constants.NEXT_CHANNEL).set(littleProxyBootStrapChannel);
 
 
                     //连接成功后，手机代理服务器向server发送认证消息
@@ -199,7 +204,7 @@ public class ProxyClient implements ChannelStatusListener {
                     LogUtil.e(tag,"： connect to server failed");
                     //等待后重新尝试连接
                     reconnectWait();
-                    connectServer(join2LittleProxyBootStrapChannel);
+                    connectServer();
                 }
             }
         });
