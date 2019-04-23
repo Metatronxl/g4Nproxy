@@ -1,6 +1,6 @@
 package com.xulei.g4nproxy_client.kidHttpProxy;
 
-import com.xulei.g4nproxy_client.Constants;
+import com.xulei.g4nproxy_protocol.protocol.Constants;
 import com.xulei.g4nproxy_client.kidHttpProxy.handler.ProxyServerHandler;
 import com.xulei.g4nproxy_client.util.LogUtil;
 

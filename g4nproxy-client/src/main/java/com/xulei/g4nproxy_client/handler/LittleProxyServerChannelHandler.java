@@ -1,6 +1,6 @@
 package com.xulei.g4nproxy_client.handler;
 
-import com.xulei.g4nproxy_client.Constants;
+import com.xulei.g4nproxy_protocol.protocol.Constants;
 import com.xulei.g4nproxy_client.ProxyClient;
 import com.xulei.g4nproxy_client.util.LogUtil;
 import com.xulei.g4nproxy_protocol.protocol.ProxyMessage;

@@ -4,7 +4,6 @@ package com.xulei.g4nproxy_client;
 import com.xulei.g4nproxy_client.handler.AppClientChannelHandler;
 import com.xulei.g4nproxy_client.handler.LittleProxyServerChannelHandler;
 import com.xulei.g4nproxy_client.kidHttpProxy.ProxySerever;
-import com.xulei.g4nproxy_client.util.Launcher;
 import com.xulei.g4nproxy_client.util.LogUtil;
 import com.xulei.g4nproxy_protocol.ClientChannelManager;
 import com.xulei.g4nproxy_protocol.ClientIdleCheckHandler;
@@ -13,7 +12,6 @@ import com.xulei.g4nproxy_protocol.protocol.ProxyMessageDecoder;
 import com.xulei.g4nproxy_protocol.protocol.ProxyMessageEncoder;
 
 import io.netty.bootstrap.Bootstrap;
-import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
@@ -23,11 +21,11 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import com.xulei.g4nproxy_protocol.protocol.Constants;
 
-import static com.xulei.g4nproxy_client.Constants.APP_CLIENT_HANDLER;
-import static com.xulei.g4nproxy_client.Constants.PROXY_MESSAGE_DECODE;
-import static com.xulei.g4nproxy_client.Constants.PROXY_MESSAGE_ENCODE;
-import static com.xulei.g4nproxy_client.Constants.manageChannelMap;
+import static com.xulei.g4nproxy_protocol.protocol.Constants.APP_CLIENT_HANDLER;
+import static com.xulei.g4nproxy_protocol.protocol.Constants.PROXY_MESSAGE_DECODE;
+import static com.xulei.g4nproxy_protocol.protocol.Constants.PROXY_MESSAGE_ENCODE;
 
 /**
  * @author lei.X
@@ -147,28 +145,6 @@ public class ProxyClient implements ChannelStatusListener {
         connectServer();
     }
 
-    /**
-     * 连接3128端口的内网服务器
-     */
-    private void connectSelfServer(){
-        join2LittleProxyBootStrap.connect("127.0.0.1",Constants.littleProxyPort).addListener(new ChannelFutureListener() {
-            @Override
-            public void operationComplete(ChannelFuture future) throws Exception {
-                if (future.isSuccess()){
-                    LogUtil.i(tag,"连接littleProxy服务器成功,端口："+Constants.littleProxyPort);
-//                    connectServer(future.channel());
-
-                    //将channel给保存起来
-                    manageChannelMap.put(Constants.LOCAL_SERVER_CHANNEL,future.channel());
-                }else{
-                    LogUtil.e(tag,"连接littleProxy服务器失败,端口："+Constants.littleProxyPort);
-                    reconnectWait();
-                    connectSelfServer();
-                }
-
-            }
-        });
-    }
 
 
     /**
@@ -233,6 +209,5 @@ public class ProxyClient implements ChannelStatusListener {
     @Override
     public void channelInactive(ChannelHandlerContext ctx) {
         reconnectWait();
-        connectSelfServer();
     }
 }

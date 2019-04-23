@@ -2,7 +2,7 @@ package com.xulei.g4nproxy_client.handler;
 
 
 import com.xulei.g4nproxy_client.ChannelStatusListener;
-import com.xulei.g4nproxy_client.Constants;
+import com.xulei.g4nproxy_protocol.protocol.Constants;
 import com.xulei.g4nproxy_client.ProxyClient;
 import com.xulei.g4nproxy_client.util.LogUtil;
 import com.xulei.g4nproxy_protocol.protocol.ProxyMessage;
@@ -17,8 +17,6 @@ import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.timeout.IdleState;
 import io.netty.handler.timeout.IdleStateEvent;
 import lombok.extern.slf4j.Slf4j;
-
-import static com.xulei.g4nproxy_client.Constants.manageChannelMap;
 
 /**
  * @author lei.X
@@ -64,7 +62,7 @@ public class AppClientChannelHandler extends SimpleChannelInboundHandler<ProxyMe
 
 
         //将这个管道放到Map中，方便服务器返回数据时调用
-        Constants.manageCtxMap.put(Constants.DATA_CHANNEL,ctx);
+//        Constants.manageCtxMap.put(Constants.DATA_CHANNEL,ctx);
 
 //        ctx.fireChannelRead(msg);
 

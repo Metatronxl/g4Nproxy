@@ -28,7 +28,6 @@ public interface Constants {
     int g4nproxyServerPort = 30000;
 
 
-
     int READ_IDLE_TIME = 60;
 
     int WRITE_IDLE_TIME = 40;
@@ -43,23 +42,29 @@ public interface Constants {
 
 
     String PROXY_MESSAGE_ENCODE = "ProxyMessageEncode";
-    String PROXY_MESSAGE_DECODE  = "proxyMessageDecoed";
+    String PROXY_MESSAGE_DECODE = "proxyMessageDecoed";
 
 
 // ProxyMessage 参数相关
 
-     int MAX_FRAME_LENGTH = 2 * 1024 * 1024;
+    int MAX_FRAME_LENGTH = 2 * 1024 * 1024;
 
-     int LENGTH_FIELD_OFFSET = 0;
+    int LENGTH_FIELD_OFFSET = 0;
 
-     int LENGTH_FIELD_LENGTH = 4;
+    int LENGTH_FIELD_LENGTH = 4;
 
-     int INITIAL_BYTES_TO_STRIP = 0;
+    int INITIAL_BYTES_TO_STRIP = 0;
 
-     int LENGTH_ADJUSTMENT = 0;
+    int LENGTH_ADJUSTMENT = 0;
 
-     //natserverChannel
+    //natserverChannel
     String NATSERVER_CHANNEL = "natserver_Channel";
 
+    // littleProxy开启的端口为3128
+    int littleProxyPort = 3128;
+
+    AttributeKey<Channel> NEXT_CHANNEL = AttributeKey.newInstance("nxt_channel");
+
+    String APP_CLIENT_HANDLER = "appClientHandler";
 
 }
