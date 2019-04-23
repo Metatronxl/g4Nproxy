@@ -88,36 +88,6 @@ public class UserMappingChannelHandler extends SimpleChannelInboundHandler<ByteB
     }
 
 
-    /**
-     * 处理发送数据的逻辑
-     *
-     * @param ctx
-     * @param msg
-     */
-    private void handleMessgeTransfer(ChannelHandlerContext ctx, ProxyMessage msg) {
-        LogUtil.i(tag, "forward data to nat channel");
-        LogUtil.w(tag, "处理发送数据的逻辑" + msg.toString());
-
-        //获取数据channel
-
-        Channel natDataChannel = ctx.channel().attr(Constants.SERVER_NEXT_CHANNEL).get();
-        natDataChannel.writeAndFlush(msg);
-//        ctx.channel().writeAndFlush(msg);
-
-    }
-
-    /***
-     * 处理接受数据的逻辑
-     * @param ctx
-     * @param msg
-     */
-    private void handleMessageRtn(ChannelHandlerContext ctx, ProxyMessage msg) {
-        LogUtil.w(tag, "处理接受数据的逻辑" + msg.toString());
-        Channel userMappingChannel = ctx.channel().attr(Constants.SERVER_NEXT_CHANNEL).get();
-        userMappingChannel.writeAndFlush(msg);
-    }
-
-
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
 
@@ -131,7 +101,7 @@ public class UserMappingChannelHandler extends SimpleChannelInboundHandler<ByteB
         Channel cmdChannel = ProxyChannelManager.getCmdChannel(sa.getPort());
         LogUtil.i(tag, "a new connect from user endpoint,local port:{}" + sa.getPort());
         if (cmdChannel == null) {
-            LogUtil.w(tag, "nat channel not ready! reject connection");
+            log.warn(tag,"nat channel not ready! reject connection");
             ctx.channel().close();
         } else {
             String userId = newUserId();
@@ -144,7 +114,7 @@ public class UserMappingChannelHandler extends SimpleChannelInboundHandler<ByteB
             proxyMessage.setSerialNumber(serialNumber);
             proxyMessage.setUri(userId);
 
-            LogUtil.i(tag, "connect to nat client ,request a data channel");
+            log.info(tag, "connect to nat client ,request a data channel");
             cmdChannel.writeAndFlush(proxyMessage);
         }
 

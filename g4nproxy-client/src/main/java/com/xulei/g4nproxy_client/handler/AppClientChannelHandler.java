@@ -61,11 +61,6 @@ public class AppClientChannelHandler extends SimpleChannelInboundHandler<ProxyMe
 
 
 
-        //将这个管道放到Map中，方便服务器返回数据时调用
-//        Constants.manageCtxMap.put(Constants.DATA_CHANNEL,ctx);
-
-//        ctx.fireChannelRead(msg);
-
 
     }
 
@@ -85,13 +80,15 @@ public class AppClientChannelHandler extends SimpleChannelInboundHandler<ProxyMe
             public void operationComplete(ChannelFuture future) throws Exception {
                 if (future.isSuccess()){
                     LogUtil.i(tag,"连接littleProxy服务器成功,端口："+Constants.littleProxyPort);
+                    //关联cmdChannel 与 littleProxyChannel
                     future.channel().attr(Constants.NEXT_CHANNEL).set(ctx.channel());
-                    //注册channel
+                    //注册littleProxyChannel
                     proxyClient.getHttpProxyConnectionManager().register(message.getSerialNumber(), future.channel());
                     // 发送连接littleProxy成功的通知
                     ProxyMessage proxyMessage = new ProxyMessage();
                     proxyMessage.setType(ProxyMessage.TYPE_CONNECT_READY);
                     proxyMessage.setSerialNumber(message.getSerialNumber());
+                    proxyMessage.setUri(message.getUri());
                     ctx.channel().writeAndFlush(proxyMessage);
 
                 }else{
@@ -145,15 +142,14 @@ public class AppClientChannelHandler extends SimpleChannelInboundHandler<ProxyMe
      * @param msg
      */
     private void handleDisconnectMessage(ChannelHandlerContext ctx,ProxyMessage msg){
-        Channel littleProxyServerChannel = ctx.channel().attr(Constants.NEXT_CHANNEL).get();
+
+        long serialNum = msg.getSerialNumber();
+        Channel littleProxyServerChannel = proxyClient.getHttpProxyConnectionManager().query(serialNum);
         LogUtil.i(tag, "handleDisconnectMessage, :" + littleProxyServerChannel);
         if (littleProxyServerChannel != null) {
-
-//            ctx.channel().attr(Constants.NEXT_CHANNEL).set(null);
-            // 将channel 返回代理池中
-//            proxyClient.getClientChannelManager().returnProxyChannel(ctx.channel());
             // 清空channel中的剩余消息
             littleProxyServerChannel.writeAndFlush(Unpooled.EMPTY_BUFFER);
+            proxyClient.getHttpProxyConnectionManager().releaseConnection(serialNum);
         }
     }
 

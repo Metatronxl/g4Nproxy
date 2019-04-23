@@ -35,10 +35,6 @@ public class NatServerChannelHandler extends SimpleChannelInboundHandler<ProxyMe
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception{
-
-   //
-//    ProxyChannelManager.setNatServerChannel(Constants.NATSERVER_CHANNEL,ctx.channel());
-
     super.channelActive(ctx);
     }
 
@@ -71,9 +67,7 @@ public class NatServerChannelHandler extends SimpleChannelInboundHandler<ProxyMe
 
     private void handleTypeConnectReady(ChannelHandlerContext ctx, ProxyMessage proxyMessage){
         Channel natChannel = ctx.channel();
-
         long seq = proxyMessage.getSerialNumber();
-
         Channel userMappingChannel = ProxyChannelManager.getUsermappingChannel(seq);
         if (userMappingChannel == null) {
             log.warn("can not find userMapping channel for request :{} client:{} when connection ready", seq);

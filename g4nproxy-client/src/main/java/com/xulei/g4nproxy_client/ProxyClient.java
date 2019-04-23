@@ -21,7 +21,6 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import com.xulei.g4nproxy_protocol.protocol.Constants;
 
 import static com.xulei.g4nproxy_protocol.protocol.Constants.APP_CLIENT_HANDLER;
 import static com.xulei.g4nproxy_protocol.protocol.Constants.PROXY_MESSAGE_DECODE;
@@ -140,8 +139,6 @@ public class ProxyClient implements ChannelStatusListener {
                         ch.pipeline().addLast(APP_CLIENT_HANDLER,new AppClientChannelHandler(ProxyClient.this,ProxyClient.this));
                     }
                 });
-        //TODO 添加sleep时间，避免内网服务器连接失败
-//        connectSelfServer();
         connectServer();
     }
 
@@ -156,14 +153,6 @@ public class ProxyClient implements ChannelStatusListener {
             @Override
             public void operationComplete(ChannelFuture future) throws Exception {
                 if (future.isSuccess()){
-
-
-                    //appBootstrap 与 join2LittleProxyBootStrap 建立绑定
-//                    Channel appBootstrapChannel = future.channel();
-//                    Channel littleProxyBootStrapChannel  = join2LittleProxyBootStrapChannel;
-//                    littleProxyBootStrapChannel.attr(Constants.NEXT_CHANNEL).set(appBootstrapChannel);
-//                    appBootstrapChannel.attr(Constants.NEXT_CHANNEL).set(littleProxyBootStrapChannel);
-
 
                     //连接成功后，手机代理服务器向server发送认证消息
                     clientChannelManager.setCmdChannel(future.channel());
@@ -209,5 +198,6 @@ public class ProxyClient implements ChannelStatusListener {
     @Override
     public void channelInactive(ChannelHandlerContext ctx) {
         reconnectWait();
+        connectServer();
     }
 }

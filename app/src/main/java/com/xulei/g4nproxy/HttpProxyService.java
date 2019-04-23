@@ -46,7 +46,11 @@ public class HttpProxyService extends Service {
             Thread thread = new Thread("g4ProxyThread") {
                 @Override
                 public void run() {
-                    startServiceInternal();
+                    try {
+                        startServiceInternal();
+                    } catch (InterruptedException e) {
+                        Log.e("HttpProxyService",e.getMessage());
+                    }
                 }
             };
             thread.setDaemon(true);
@@ -72,7 +76,7 @@ public class HttpProxyService extends Service {
         manager.createNotificationChannel(notificationChannel);
     }
 
-    private void startServiceInternal() {
+    private void startServiceInternal() throws InterruptedException {
 
         setNotifyChannel();
 
