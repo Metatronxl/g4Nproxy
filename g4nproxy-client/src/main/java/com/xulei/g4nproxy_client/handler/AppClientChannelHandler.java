@@ -82,16 +82,20 @@ public class AppClientChannelHandler extends SimpleChannelInboundHandler<ProxyMe
                     future.channel().attr(Constants.NEXT_CHANNEL).set(ctx.channel());
                     //注册littleProxyChannel
                     proxyClient.getHttpProxyConnectionManager().register(message.getSerialNumber(), future.channel());
+                    //添加littleProxyChannel到RealServerChannels
+                    String userId =  message.getUri();
+                    proxyClient.getClientChannelManager().addLittleProxyServerChannel(userId,future.channel());
+
                     // 发送连接littleProxy成功的通知
                     ProxyMessage proxyMessage = new ProxyMessage();
                     proxyMessage.setType(ProxyMessage.TYPE_CONNECT_READY);
                     proxyMessage.setSerialNumber(message.getSerialNumber());
-                    proxyMessage.setUri(message.getUri());
+                    proxyMessage.setUri(userId);
                     ctx.channel().writeAndFlush(proxyMessage);
 
                 }else{
                     LogUtil.e(tag,"连接littleProxy服务器失败,端口："+Constants.littleProxyPort);
-                    log.warn("connect to LITTEL proxy failed", future.cause());
+                    log.warn("connect to littleProxy failed", future.cause());
                     ProxyMessage natMessage = new ProxyMessage();
                     natMessage.setType(ProxyMessage.TYPE_DISCONNECT);
                     natMessage.setSerialNumber(message.getSerialNumber());
@@ -175,22 +179,15 @@ public class AppClientChannelHandler extends SimpleChannelInboundHandler<ProxyMe
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
 
-//        // 控制连接
-//        if (proxyClient.getClientChannelManager().getCmdChannel() == ctx.channel()) {
-//            proxyClient.getClientChannelManager().setCmdChannel(null);
-//            proxyClient.getClientChannelManager().clearRealServerChannels();
-//            channelStatusListener.channelInactive(ctx);
-//        } else {
-//            // 数据传输连接
-//            Channel realServerChannel = ctx.channel().attr(Constants.NEXT_CHANNEL).get();
-//            if (realServerChannel != null && realServerChannel.isActive()) {
-//                realServerChannel.close();
-//            }
-//        }
-//
-//        proxyClient.getClientChannelManager().removeProxyChannel(ctx.channel());
 
-        LogUtil.i(tag,"channel 断开连接");
+        if (proxyClient.getClientChannelManager().getCmdChannel() == ctx.channel()) {
+            proxyClient.getClientChannelManager().setCmdChannel(null);
+            //清空所有的littleProxy连接
+            proxyClient.getClientChannelManager().clearRealServerChannels();
+            channelStatusListener.channelInactive(ctx);
+        }
+
+        log.info(tag,"app channel 断开连接");
         super.channelInactive(ctx);
 
     }

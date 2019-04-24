@@ -31,6 +31,13 @@
 ### 使用说明
 在部署完毕后，http://「your ip 」:30000/portList 可以查看已经连接上服务器的手机，一个手机对应一个端口，可以通过访问这些端口来让手机作为代理服务器
 
+### 效果图
+
+![效果图](https://ws4.sinaimg.cn/large/006tNc79ly1g2dhovbqirj311k0u0all.jpg)
+
+
+
+
 
 ## Finished Job
 
