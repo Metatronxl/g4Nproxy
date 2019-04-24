@@ -84,7 +84,9 @@ public class AppClientChannelHandler extends SimpleChannelInboundHandler<ProxyMe
                     proxyClient.getHttpProxyConnectionManager().register(message.getSerialNumber(), future.channel());
                     //添加littleProxyChannel到RealServerChannels
                     String userId =  message.getUri();
+                    //关联userID与littleProxy
                     proxyClient.getClientChannelManager().addLittleProxyServerChannel(userId,future.channel());
+                    proxyClient.getClientChannelManager().setRealServerChannelUserId(future.channel(),userId);
 
                     // 发送连接littleProxy成功的通知
                     ProxyMessage proxyMessage = new ProxyMessage();

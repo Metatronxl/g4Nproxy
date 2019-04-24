@@ -37,24 +37,24 @@ public class HttpChannelFutureListener implements ChannelFutureListener {
     public void operationComplete(ChannelFuture future) throws Exception {
         String channelId = ProxyUtil.getChannelId(ctx);
 
-        if (future.isSuccess()){
-            log.info(LOG_PRE + ",与目标主机建立连接成功.",channelId);
+        if (future.isSuccess()) {
+            log.info(LOG_PRE + ",与目标主机建立连接成功.", channelId);
             //将客户端请求报文发送给服务端
             future.channel().writeAndFlush(msg);
             return;
         }
-        log.info(LOG_PRE + ",与目标主机建立连接失败.",channelId);
+        log.info(LOG_PRE + ",与目标主机建立连接失败.", channelId);
         //连接失败操作,暂且返回408,请求超时
         ProxyUtil.responseFailedToClient(ctx);
 
         Throwable cause = future.cause();
-        if(cause instanceof ConnectTimeoutException)
+        if (cause instanceof ConnectTimeoutException)
             log.error(LOG_PRE + ",连接超时:{}", ProxyUtil.getChannelId(ctx), cause.getMessage());
         else if (cause instanceof UnknownHostException)
             log.error(LOG_PRE + ",未知主机:{}", ProxyUtil.getChannelId(ctx), cause.getMessage());
         else
-            log.error(LOG_PRE + ",异常:{}", ProxyUtil.getChannelId(ctx),cause.getMessage(),cause);
-        log.info(LOG_PRE + ",给客户端响应失败信息成功.",channelId);
+            log.error(LOG_PRE + ",异常:{}", ProxyUtil.getChannelId(ctx), cause.getMessage(), cause);
+        log.info(LOG_PRE + ",给客户端响应失败信息成功.", channelId);
         //并关闭 与客户端的连接
         ctx.close();
 

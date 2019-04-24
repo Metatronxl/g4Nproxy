@@ -5,16 +5,15 @@ import com.xulei.g4nproxy_protocol.protocol.Constants;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
 
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.util.AttributeKey;
-import jdk.nashorn.internal.objects.annotations.Setter;
 
 /**
  * 代理客户端与后端真实服务器连接管理
+ *
  * @author lei.X
  * @date 2019/3/18 4:06 PM
  */
@@ -26,12 +25,8 @@ public class ClientChannelManager {
 
     private final AttributeKey<Boolean> CLIENT_CHANNEL_WRITEABLE = AttributeKey.newInstance("client_channel_writeable");
 
-    private final int MAX_POOL_SIZE = 100;
+    private Map<String, Channel> littleProxyServerChannels = new ConcurrentHashMap<>();
 
-    private Map<String,Channel> littleProxyServerChannels = new ConcurrentHashMap<>();
-
-
-    private ConcurrentLinkedQueue<Channel> proxyChannelPool = new ConcurrentLinkedQueue<>();
 
     private volatile Channel cmdChannel;
 
@@ -51,26 +46,9 @@ public class ClientChannelManager {
     }
 
 
-
-    /**
-     * 将channel返回代理池中
-     * @param proxyChannel
-     */
-    public void returnProxyChannel(Channel proxyChannel){
-        if (proxyChannelPool.size() > MAX_POOL_SIZE){
-            proxyChannel.close();
-        }else {
-            proxyChannelPool.offer(proxyChannel);
-            ALOG.i(tag, "return ProxyChanel to the pool, channel is :" + proxyChannel + ", pool size is : " + proxyChannelPool.size());
-        }
-    }
-
-    public void removeProxyChannel(Channel proxyChannel){
-        proxyChannelPool.remove(proxyChannel);
-    }
-
     /**
      * 以手机生成的userId作为每个代理channel的USER_ID
+     *
      * @param littleProxyServerChannel
      * @param userId
      */
