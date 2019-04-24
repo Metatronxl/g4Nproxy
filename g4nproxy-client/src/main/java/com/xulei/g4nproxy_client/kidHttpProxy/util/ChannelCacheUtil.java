@@ -20,7 +20,7 @@ public class ChannelCacheUtil {
             .expireAfterAccess(30, TimeUnit.SECONDS)
             //传入缓存加载策略,key不存在时调用该方法返回一个value回去
             //此处直接返回空
-            .build(key -> null);
+            .build(null);
 
     /**
      * 获取数据

@@ -19,7 +19,7 @@ dependencies {
     // 引入g4nproxy-protocol的包
     implementation project(':g4nproxy-protocol')
     // 引入LittleProxy的包
-    implementation project(":LittleProxy")
+//    implementation project(":LittleProxy")
     compileOnly 'org.projectlombok:lombok:1.16.20'
     // https://mvnrepository.com/artifact/org.slf4j/slf4j-api
     implementation group: 'org.slf4j', name: 'slf4j-api', version: '1.7.25'
@@ -28,8 +28,9 @@ dependencies {
 
 
     implementation 'com.google.guava:guava:18.0'
-    // https://mvnrepository.com/artifact/com.github.ben-manes.caffeine/guava
-    implementation group: 'com.github.ben-manes.caffeine', name: 'guava', version: '2.7.0'
+    // https://mvnrepository.com/artifact/com.github.ben-manes.caffeine/caffeine
+    compile group: 'com.github.ben-manes.caffeine', name: 'caffeine', version: '2.7.0'
+
 
     implementation 'org.apache.commons:commons-lang3:3.7'
     // https://mvnrepository.com/artifact/com.alibaba/fastjson
